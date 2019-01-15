@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title><![CDATA[Developer Productivity]]></title><description><![CDATA[Thoughts, stories and ideas collaborated across developer productivity teams worldwide]]></description><link>https://devproductivity.io/</link><image><url>https://devproductivity.io/favicon.png</url><title>Developer Productivity</title><link>https://devproductivity.io/</link></image><lastBuildDate>Tue, 18 Dec 2018 01:58:23 GMT</lastBuildDate><atom:link href="https://devproductivity.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Development Environments Within VMs]]></title><description><![CDATA[<div class="kg-card-markdown"><p>A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as <a href="https://www.vagrantup.com/">Vagrant</a> make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine.</p></div>]]></description><link>https://devproductivity.io/development-environments-within-vms/</link><guid isPermaLink="false">5a9b4764157ea200223dcb51</guid><category><![CDATA[Developer Environments]]></category><dc:creator><![CDATA[Jean-Francois Bibeau]]></dc:creator><pubDate>Sun, 04 Mar 2018 02:15:35 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as <a href="https://www.vagrantup.com/">Vagrant</a> make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine.</p>
+<h1 id="basicconcepts">Basic Concepts</h1>
+<p>Let's explore some basic concepts regarding development environments in VMs. Ideally these should be considered thoroughly before starting the implementation:</p>
+<ol>
+<li>The VM provider: Will this be a local hypervisor (ex: kvm, VirtualBox), or a remote one (ex: VMWare, OpenStack)?</li>
+<li>The VM provisioner: Generally, a layer of configurations need to be applied to your virtual machine. This could be as simple as a bash script, or as complex as running a configuration management tool such as Chef, Puppet or Ansible.</li>
+<li>The VM base OS: You'll have to pick which operating system the guest VM is running; ideally this would be the same as in production.</li>
+<li>Delineation between host and guest: What stays on the host, as opposed to living on the guest VM? Where does the code live?</li>
+</ol>
+<h1 id="aconcreteexample">A Concrete Example</h1>
+<p>This article will explore some advantages as well as some challenges with this approach. We'll look at a specific implementation of a development environment for a company I worked for. Specifically:</p>
+<ol>
+<li>VM Provider: The VM provider chosen was the default Vagrant provider, VirtualBox. This is the easiest to implement, as VirtualBox has support for many host operating systems and is proven software.</li>
+<li>VM Provisioner: Chef was picked primarily because of its ability to have automated pull capabilities from a central server. This allows the development environment to grow and receive updates which will automatically be rolled out to all developers, without requiring end-users to run any commands to pick up the updates.</li>
+<li>VM base OS: We decided to go with RedHat Enterprise Linux since this was the chosen OS for the production environment.</li>
+<li>Host/guest split: This is the most complicated decision. In our implementation, the host OS runs the IDE and hosts the code. Keeping the code on the host OS ensures that any mishaps with the VM does not result in code loss. All other build tools and runtimes (JDK, Gradle, NodeJS, Tomcat) run within the guest OS. Source code management (git) is installed both on the host and the guest, for extra flexibility.</li>
+</ol>
+<h2 id="extranicetohaves">Extra nice-to-haves</h2>
+<p>A few more nice-to-haves were implemented:</p>
+<ul>
+<li>Automatic SSH key forwarding: the host OS' SSH key is automatically forwarded to the VM, allowing git identities to be preserved across boundaries.</li>
+<li>Automatic X11 forwarding: GUI applications can be started from the VM and forwarded to the host OS, if needed</li>
+<li>Automatic shell variable setup: A file was created by convention and copied to the VM on every start, allowing a user to preserve configurations/shell variables even after a VM destroy/create.</li>
+</ul>
+<h1 id="advantages">Advantages</h1>
+<h2 id="fastonboarding">Fast onboarding</h2>
+<p>One of the main advantages of this approach is the speed of first-time setup. For a new developer coming along, the setup process is essentially 2 commands: 1 to setup his host OS (install Vagrant/VirtualBox/Git and get the necessary files for setup), and 1 to bring the VM up.</p>
+<p>After only a few minutes (target time being 3-5 minutes at most), the developer has a fully functional development environment.</p>
+<h2 id="abilitytodestroyandrecreatequickly">Ability to destroy and recreate quickly</h2>
+<p>Based on what we saw in the previous step, a developer is able to quickly recreate his development environment. If something goes wrong during development, many developers will choose to simply recreate the development environment instead of spending an hour troubleshooting the system.</p>
+<h2 id="isolationfromthehostmachine">Isolation from the host machine</h2>
+<p>Another advantage is isolution from the host machine. Many development tools may conflict with the host OS, for example installing or upgrading python packages using the system-level python may have undesired consequences. Later trying to undo those changes can be really problematic. Hosting everything within a VM lets developers experiment freely without fear of damaging their host OS configurations or packages.</p>
+<h2 id="supportofmultiplehostoses">Support of multiple host OSes</h2>
+<p>One of the requirements we had was to support multiple host OSes. Most developers traditionally did development on Linux workstations, so we had to support RedHat and Ubuntu. MacBooks were also being introduced, so support for Mac was a must. And finally, several QA engineers only had a Windows laptop but were still expected to develop tests, so Windows support was a nice to have.</p>
+<p>Trying to tool or document all these setup steps for 4 different OSes would be near impossible. With a VM, this problem goes away almost completely.</p>
+<h2 id="easeoftroubleshooting">Ease of troubleshooting</h2>
+<p>And finally, because everyone is using the same development OS and all resources have been setup the same way, when a developer needs support, that support can be provided much more efficiently. No more finding out which version of Java they installed or where their global npm <code>node_modules</code> folder is - everything is at the same place and configured identically for every developer.</p>
+<h2 id="reuseduringci">Re-use during CI</h2>
+<p>Since the development environment is a virtual machine, it can be re-used during continuous integration for the build slaves. That way, CI processes run on the identical environment as developers, removing the &quot;it builds on my box, why doesn't it build on CI?&quot; problem! Specifically using vagrant, you can simply pick another provider, for example OpenStack instead of VirtualBox, and run your build slaves on the cloud.</p>
+<h1 id="challenges">Challenges</h1>
+<h2 id="nfsmountforcodeshare">NFS mount for code share</h2>
+<p>The previous article on <a href="https://devproductivity.io/shopify-developer-environments-p1/">Shopify Developer Environments </a> touched on this slighty: since the IDE and the code was on the host machine, but all build and runtime tools were on the development environment VM, this meant the code had to be shared. The default VirtualBox shared filesystem is notoriously slow, so the current fastest way to share code is with an NFS mount. This works and is pretty fast, but nowhere near as fast as having the code and the tools on the same physical drive.</p>
+<p>Additionally, this extra NFS layer added some problems when using tools such as file watchers, and also exposed some buggy NFS implementations in macOS.</p>
+<h2 id="natportforwarding">NAT/port forwarding</h2>
+<p>Since our code is now compiled and running in the VM, this means we need to reach out to a different local IP address to connect to it. This is fine locally, however if a coworker wants to reach your VM's private IP, it won't be reachable. Which is where NAT'ing (to enable VM -&gt; outside connectivity) and port forwarding (to enable outside -&gt; VM connectivity) need to be configured properly.</p>
+<p>These can all be configured, however it introduces more complexity to the runtime environments as applications (and developers!) now need to work in a NAT'd environment and be aware of private and public IP addresses.</p>
+<h2 id="chefregistration">Chef registration</h2>
+<p>Finally, one specific downside of Chef is that each node that receives configurations must be registered centrally with the Chef server using a private key. We went with a convention of using a known VM name appended to the host machine's hostname to ensure uniquess across the organization, and auto-registration on VM up. However if a developer uncleanly deletes the VM, or if a workstation changes hostnames, the registration with the Chef server can be left behind, causing headaches for the developer.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Overall, this approach has been successful, although not perfect. The trade-offs can mostly be tooled around, and the advantages generally give us enough benefits to continue with this appraoch. However, work is always ongoing to iterate and improve on this approach. Hopefully this article has been useful to share our thoughts on VMs for developer environments!</p>
+</div>]]></content:encoded></item><item><title><![CDATA[Focusing on what's important: Managing GitHub notifications with Octobox]]></title><description><![CDATA[Stop spending time organizing your GitHub notifications. Achieve greater productivity by quickly seeing what's actually important with Octobox.]]></description><link>https://devproductivity.io/focusing-on-whats-important-with-octobox/</link><guid isPermaLink="false">5a8f2221f4623c0022ec0e27</guid><category><![CDATA[General Productivity]]></category><category><![CDATA[Version Control and Hosting]]></category><dc:creator><![CDATA[Chris Arcand]]></dc:creator><pubDate>Thu, 22 Feb 2018 21:00:00 GMT</pubDate><media:content url="https://devproductivity.io/content/images/2018/02/s9fq4.jpg" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><img src="https://devproductivity.io/content/images/2018/02/s9fq4.jpg" alt="Focusing on what's important: Managing GitHub notifications with Octobox"><p>Many people wonder how some individuals can be so productive. It might seem that someone you know gets an especially copious amount of work done given the same amount of time as anyone else.  There's a lot of discussion to be had about what 'productive' even means and the best methods to go about being productive, but ultimately you can boil it all down to two statements:</p>
+<ul>
+<li>Spend your time on what's important</li>
+<li>Don't spend your time on what's not important</li>
+</ul>
+<p>These points might seem obvious, but applying them to every aspect of your day is harder than you might think.</p>
+<p>As developers we spend a lot of time looking at issues and reviewing code changes, interacting asynchronously with other people on multiple subjects over an indeterminate amount of time. While this is reasonable to manage via email notifications on small projects, as your organization and codebase grows your inbox quickly turns in to a water hose of GitHub notifications that all start to look the same. This problem is compounded if you're active in open source where you'd like to follow the activity of different projects outside of your own - and further compounded when the projects you're interested in are <a href="https://github.com/ManageIQ/manageiq">very</a>, <a href="https://github.com/torvalds/linux">very</a> <a href="https://github.com/rails/rails">large</a>.</p>
+<p>Spending too much time figuring out what notifications are actually important<br>
+in the current moment isn't productive. Trying to remember which notifications you actually need to follow with up over and over again is also not productive. Most open source maintainers and GitHub staff end up using a complex combination of filters and labels in Gmail to manage their notifications from their inbox. The productive thing to do, however, is to maximize your time actually addressing those issues!</p>
+<p>Enter <a href="https://github.com/octobox/octobox">Octobox</a>.</p>
+<p><img src="http://screenshots.chrisarcand.com/permhc15o.jpg" alt="Focusing on what's important: Managing GitHub notifications with Octobox"></p>
+<p>Octobox is an application that manages your GitHub notifications via GitHub's<br>
+V3 REST API, allowing you to filter down by organization, project, notification type, or the reason <em>why</em> you are receiving the notification in the first place.</p>
+<p>With GitHub's notifications UI, when notifications are marked as read they<br>
+disappear from the list. This makes it very hard to keep on top of which<br>
+notifications you still need to follow up on. Octobox adds an extra &quot;archived&quot; state to each notification so you can mark it as &quot;done&quot;. If new activity happens on the thread/issue/pull request, the next time you sync your notifications the relevant item will be unarchived and moved back into your inbox.</p>
+<p>With Octobox it's easy to drill down in to the issues that matter to you in the current moment while still allowing you to be subscribed to projects that you'd like to keep an eye on. You can quickly address threads that you've authored yourself or remember that you still need to submit your review that someone requested. You can &quot;star&quot; long-running issues that you know might be important down the road. And anyone refusing to touch their mouse will be pleasantly surprised at the amount of keyboard shortcuts for all of these actions. ;)</p>
+<p>Working full-time in open source, I have to keep track of a lot of different<br>
+projects - but I also try and maximize my productivity by paying attention to<br>
+what's important at a particular moment. Octobox is a tool I use to do just<br>
+that.</p>
+<p><em>Octobox is open source and <a href="https://github.com/octobox/octobox">available on GitHub</a>. You can try it immediately at <a href="https://octobox.io/">octobox.io</a></em></p>
+</div>]]></content:encoded></item><item><title><![CDATA[Room to Move]]></title><description><![CDATA[<div class="kg-card-markdown"><p>In his book, <a href="https://www.amazon.com/Slack-Getting-Burnout-Busywork-Efficiency/dp/0767907698">Slack</a>, Tom DeMarco writes:</p>
+<blockquote>
+<p><em>Slack</em> is a prescription for building a capacity to change into the modern enterprise. It looks into the heart of the efficiency-flexibility quandary: The more efficient you get, the harder it is to change. The book shows managers how to make their organizations</p></blockquote></div>]]></description><link>https://devproductivity.io/room-to-move/</link><guid isPermaLink="false">5a8352fd49643f002216dbdf</guid><category><![CDATA[General Productivity]]></category><category><![CDATA[Mystery Science]]></category><dc:creator><![CDATA[chrismo]]></dc:creator><pubDate>Tue, 13 Feb 2018 21:08:22 GMT</pubDate><media:content url="https://devproductivity.io/content/images/2018/02/duotone.png" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><img src="https://devproductivity.io/content/images/2018/02/duotone.png" alt="Room to Move"><p>In his book, <a href="https://www.amazon.com/Slack-Getting-Burnout-Busywork-Efficiency/dp/0767907698">Slack</a>, Tom DeMarco writes:</p>
+<blockquote>
+<p><em>Slack</em> is a prescription for building a capacity to change into the modern enterprise. It looks into the heart of the efficiency-flexibility quandary: The more efficient you get, the harder it is to change. The book shows managers how to make their organizations slightly less efficient but enormously more effective. It coaches them on the introduction of slack, the missing ingredient required for all change. It counsels a thoughtful use of slack instead of the mindless obsession with elimination of all slack in the interests of efficiency.</p>
+</blockquote>
+<p>The other day on the job one of the devs on my team posted a PR for code review with a comment like: “This removes X from the codebase. It's not terribly important, but it's been bugging for a long time and I'm glad to be rid of it.”</p>
+<p>I realized that the presence of such PRs is an interesting metric to measure the amount of <em>Slack</em> of my team.</p>
+<p>If they're too efficient in knocking out cards from stakeholders, I probably won't see any work like this.</p>
+<p><em>repost from my <a href="http://clabs.org/blog/RoomToMove">cLabs</a> blog</em></p>
+</div>]]></content:encoded></item><item><title><![CDATA[Healthy Teams Are Productive Teams]]></title><description><![CDATA[<div class="kg-card-markdown"><p>I’ve had the privilege of working remote for over 6 years at LivingSocial/Groupon and lately at Mystery Science. Remote work still gets big time plugs, but it seems many places, including young, hip startups don’t buy it, that co-location is an important attribute for a team.</p>
+<p>And</p></div>]]></description><link>https://devproductivity.io/healthy-teams-are-productive-teams/</link><guid isPermaLink="false">5a709a85cfae4800220a97ec</guid><category><![CDATA[General Productivity]]></category><category><![CDATA[Mystery Science]]></category><dc:creator><![CDATA[chrismo]]></dc:creator><pubDate>Tue, 30 Jan 2018 16:31:30 GMT</pubDate><media:content url="https://devproductivity.io/content/images/2018/02/duotone--1-.png" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><img src="https://devproductivity.io/content/images/2018/02/duotone--1-.png" alt="Healthy Teams Are Productive Teams"><p>I’ve had the privilege of working remote for over 6 years at LivingSocial/Groupon and lately at Mystery Science. Remote work still gets big time plugs, but it seems many places, including young, hip startups don’t buy it, that co-location is an important attribute for a team.</p>
+<p>And I get it. Co-location was a big deal in the Agile movement to help foster communication. But having managed several remote teams of almost 100% remote employees, why don’t I care?</p>
+<p>I think the co-location agile pushes has much more to do with communication than proximity. Proximity <em>can</em> greatly drive down communication costs, but these days with Slack and Google Hangouts (to name but a couple), communication can be had without proximity.</p>
+<p>Want to build a great team? Google studied this for a long time, and on a recent Freakonomics podcast (<a href="http://freakonomics.com/podcast/how-to-be-more-productive/">How to Be More Productive</a>), Stephen Dubner interviewed <a href="https://en.wikipedia.org/wiki/Laszlo_Bock">Laszlo Bock</a>, SVP of People Operations at Google about their Project Aristotle.</p>
+<p>After analyzing data from 200 teams across Google of all varieties, they derived five “norms” the best teams at Google had. Things that weren’t on the list?</p>
+<blockquote>
+<p>… in the academic research it says consensus-driven decision-making is often better than top-down direction. And academic research says workload matters a lot. Having teams in the same location. We actually found none of those things were in the top five of what mattered in terms of effectiveness for teams. (<em>around the 24 minute mark</em>)</p>
+</blockquote>
+<p>What <em>did</em> top the list?</p>
+<blockquote>
+<p>the most important attribute of a high-performing team is not who leads it or who’s on it or how many people or where it is. It’s <strong>psychological safety</strong>.</p>
+</blockquote>
+<p>Charles Duhigg, author of <a href="http://www.amazon.com/gp/product/081298160X/">The Power of Habit</a> elaborates:</p>
+<blockquote>
+<p>Which means that everyone at the table feels like they have the opportunity to speak up, and they all feel like each other is actually listening to them, as demonstrated by the fact that their teammates are sensitive to nonverbal cues.</p>
+</blockquote>
+<p>Bock continues:</p>
+<blockquote>
+<p>We ask if the team members feel that they can fail openly or do they feel that they are going to be shunned by failing? We ask, do they feel as if other team members are supporting or undermining them?</p>
+</blockquote>
+<p>Or, as I would say it, they’re on a team that doesn’t <em>shame them</em>. (See <a href="https://medium.com/@the_chrismo/beyond-impostor-syndrome-9db7e0b6158a">Beyond Impostor Syndrome</a> for more).</p>
+<p>The four other norms Bock identifies are Dependability, Structure and Clarity, Meaning, and Impact. He also tacks on the importance of <em>actually doing</em> 1:1s, and making sure everyone feels included, don’t let the dominators dominate.</p>
+<p>Which I love.</p>
+<p>But I love umpteen times more the first point.</p>
+<p>Low shame teams beat out other factors. So does low shame anything.</p>
+<p>Make sure you’re not outsourcing your soft skills to the fringe of your organization; paying attention to these things may be more important than you realize.</p>
+<p><em>repost from my <a href="http://clabs.org/blog/HealthyTeamsAreProductiveTeams">cLabs</a> blog</em></p>
+</div>]]></content:encoded></item><item><title><![CDATA[Dev - Shopify's All Purpose Development Tool]]></title><description><![CDATA[<div class="kg-card-markdown"><p>Consistency is important across development environments; inconsistencies can lead to debugging nightmares and incorrect local behaviour. Even with the existing tools like <code>chruby</code>, <code>bundler</code> and <code>homebrew</code> to manage dependencies, setup can be a multi-step esoteric process and it can be difficult to outline the processes that achieve desired consistency.</p>
+<p>At</p></div>]]></description><link>https://devproductivity.io/dev-shopifys-all-purpose-development-tool/</link><guid isPermaLink="false">5a6fd8e05ecce60022e3e8eb</guid><category><![CDATA[Shopify]]></category><category><![CDATA[Developer Environments]]></category><dc:creator><![CDATA[Kevin Peng]]></dc:creator><pubDate>Tue, 30 Jan 2018 04:40:49 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>Consistency is important across development environments; inconsistencies can lead to debugging nightmares and incorrect local behaviour. Even with the existing tools like <code>chruby</code>, <code>bundler</code> and <code>homebrew</code> to manage dependencies, setup can be a multi-step esoteric process and it can be difficult to outline the processes that achieve desired consistency.</p>
+<p>At Shopify, we have hundreds of developers working on hundreds of active projects. Many of these projects, for a while, had their own workflows, setup instructions, ways of running tests and so on.</p>
+<p>We've created a tool called <code>dev</code> to provide us with a unified workflow across a variety of projects. It provides a way to specify and automate installation of all the dependencies and includes workflow items required to boot the project on macOS, from XCode to <code>rake db:migrate</code>.</p>
+<h2 id="introducingdev">Introducing Dev</h2>
+<p>Dev is a command-line tool, mostly implemented in ruby, with some shell integration supporting <code>bash</code>, <code>zsh</code>, and <code>fish</code>. It provides a set of commands to interact with the various projects under a GitHub account including cloning, bootstrapping, running tests, booting servers, and shell integration to activate certain dependencies (e.g. particular ruby or node versions) when entering a project directory.</p>
+<h2 id="devoutofthebox">Dev out of the box</h2>
+<p>Almost all active projects at Shopify are dev-enabled. If a developer wants to start working on one of these projects, they need to run only one command, <code>dev up</code>, to completely setup and update their development environment for the project. This includes everything from installing XCode to running pending database migrations.</p>
+<p>During the dev up process, dev executes a sequential list of tasks. Tasks check for some condition or desired state (e.g. some package directory exists), and executes some code to meet that condition, if not already met. This way, initial setup (e.g. install ruby) and ongoing maintenance (e.g. run bundle install) are unified in one action. Dev provides a library of tasks to choose from, and each project defines its own dependencies in its dev.yml file.</p>
+<p><code>dev.yml</code> acts as a spec for a project. It defines what tasks need to be run during the up process, and contains everything that dev needs to know about the project. To start using dev with your project, you need to add a file named dev.yml to the root directory of the project, and start defining the spec for your project. We have a command, dev init that will help to initialize the dev.yml for a project, based on some preset templates. This is a segment of an example dev.yml file from a ruby project:</p>
+<pre><code class="language-yaml"># up hash defines the sequence of tasks
+up:
+  - homebrew:
+    - shellcheck
+  - ruby: 2.3.3
+  - bundler
+
+# list of command aliases
+commands:
+  test: bin/testunit
+  style: &quot;bundle exec rubocop ; find . -name '*.sh' | grep -vE 'chruby|nvm' | xargs shellcheck&quot;
+</code></pre>
+<p>Running dev up in this project on a new machine will:</p>
+<ul>
+<li>Install <code>homebrew</code></li>
+<li>Install shellcheck from <code>homebrew</code></li>
+<li>Install ruby-install from <code>homebrew</code></li>
+<li>Install ruby 2.3.3 using <code>ruby-install</code></li>
+<li>Activate ruby 2.3.1 using dev’s built-in <code>chruby</code></li>
+<li>Install <code>bundler</code> using ruby 2.3.1</li>
+<li>Run <code>bundle install</code></li>
+</ul>
+<p>Running dev up again, later, after modifying the project’s Gemfile will:</p>
+<ul>
+<li>Run <code>bundle install</code></li>
+</ul>
+<p>Dev acts as a version manager for languages, switching to the versions defined in the <code>dev.yml</code> file as the user moves around between projects. Custom command aliases can also be defined in the <code>dev.yml</code> files as shown above, defining commands for checking style and testing.</p>
+<h2 id="navigatingwithdev">Navigating with Dev</h2>
+<p>In addition to aiding with development environment setup, dev provides several commands to help improve navigation. Dev can be used to manage your projects in your file system. We encourage a <code>GOPATH</code>-compatible file structure (<code>~/src/github.com/account/project</code>) but allow users to customize their file structure too.</p>
+<p>Projects are added to your file structure using <code>dev clone &lt;account&gt;/&lt;project&gt;</code>, which clones from github, and dev will attempt to infer where it should save your project. Then you can navigate to the project from anywhere in the command line using the dev cd command, fuzzy matching included.</p>
+<p>Within a project, <code>dev open</code> can be used to open the browser to specific pages. All projects, dev enabled or not, have access to the command <code>dev open github</code> which opens the github page for the project, while <code>dev open pr</code> opens the existing pull request for your branch or opens a page to create a new pull request. Custom project open commands can be defined in the <code>dev.yml</code> file. For example, the following section creates the command <code>dev open production</code>:</p>
+<pre><code class="language-yaml"># dev.yml
+open: 
+  production: https://www.shopify.com
+</code></pre>
+<h2 id="anoteaboutdatastores">A Note About Datastores</h2>
+<p>At Shopify, we run all the datastores our applications depend on (e.g. mysql, redis, memcached, elasticsearch, zookeeper, …) in a little sidekick VM managed by some other software we’ve written (‘railgun’). We think Docker For Mac can also probably fill this need, but there’s no integration built in yet.</p>
+<p>Datastores can just be provisioned onto the host using the homebrew task, but to get version / data isolation per project will currently require some extra configuration.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Dev's goal was to improve the life of all developers using it. It's easy to get started with dev at Shopify by initializing some dev.yml files. Dev defines a clear idiom for managing development environments and navigating between many projects.</p>
+<p>A tool like dev works best when the entire organization standardizes on it. If the following are true for you, you may get some value out taking inspiration from dev:</p>
+<ul>
+<li>Contributing to another team’s project is more difficult because of setup difficulty;</li>
+<li>You have many projects with non-standard setup instructions in various READMEs, or half-functional bootstrap scripts that go unmaintained by daily users;</li>
+<li>It’s feasible to expect all developers to install a new tool and learn to use it.</li>
+</ul>
+<p>Thanks for reading!</p>
+</div>]]></content:encoded></item><item><title><![CDATA[Chat Ops and Developer Productivity]]></title><description><![CDATA[<div class="kg-card-markdown"><p>John Arthorne of Shopify talks about Chat Ops and Developer Productivity</p>
+<iframe width="100%" src="https://www.youtube.com/embed/pJpWUgJwkrg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></description><link>https://devproductivity.io/chat-ops-and-developer-productivity/</link><guid isPermaLink="false">5a6ffe495ecce60022e3e90b</guid><category><![CDATA[Shopify]]></category><category><![CDATA[Meetup]]></category><category><![CDATA[General Productivity]]></category><dc:creator><![CDATA[Other]]></dc:creator><pubDate>Mon, 15 Jan 2018 05:11:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>John Arthorne of Shopify talks about Chat Ops and Developer Productivity</p>
+<iframe width="100%" src="https://www.youtube.com/embed/pJpWUgJwkrg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></content:encoded></item><item><title><![CDATA[Datadog's Developer Productivity Team]]></title><description><![CDATA[<div class="kg-card-markdown"><p>Dan Benamy of Datadog talks about the developer environment and tools at Datadog.</p>
+<iframe width="100%" src="https://www.youtube.com/embed/Cyo1hTsJFoQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></description><link>https://devproductivity.io/datadogs-developer-productivity-team/</link><guid isPermaLink="false">5a6feda25ecce60022e3e8fb</guid><category><![CDATA[Meetup]]></category><category><![CDATA[Datadog]]></category><category><![CDATA[General Productivity]]></category><dc:creator><![CDATA[Other]]></dc:creator><pubDate>Mon, 15 Jan 2018 04:01:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>Dan Benamy of Datadog talks about the developer environment and tools at Datadog.</p>
+<iframe width="100%" src="https://www.youtube.com/embed/Cyo1hTsJFoQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></content:encoded></item><item><title><![CDATA[2.76x Developer: Habits of a productive developer]]></title><description><![CDATA[<div class="kg-card-markdown"><p>Chris Morris of MysteryScience.com talks about the habits and tools of a productive developer.</p>
+<iframe width="100%" src="https://www.youtube.com/embed/e--7TWeGu94" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></description><link>https://devproductivity.io/2-76x-developer-habits-of-a-productive-developer/</link><guid isPermaLink="false">5a6fe8585ecce60022e3e8f2</guid><category><![CDATA[General Productivity]]></category><category><![CDATA[Mystery Science]]></category><category><![CDATA[Meetup]]></category><dc:creator><![CDATA[chrismo]]></dc:creator><pubDate>Mon, 15 Jan 2018 03:37:00 GMT</pubDate><media:content url="https://devproductivity.io/content/images/2018/02/duotone--2-.png" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><img src="https://devproductivity.io/content/images/2018/02/duotone--2-.png" alt="2.76x Developer: Habits of a productive developer"><p>Chris Morris of MysteryScience.com talks about the habits and tools of a productive developer.</p>
+<iframe width="100%" src="https://www.youtube.com/embed/e--7TWeGu94" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>]]></content:encoded></item><item><title><![CDATA[Current Developer Environments at Shopify]]></title><description><![CDATA[<div class="kg-card-markdown"><p>In a <a href="https://devproductivity.io/shopify-developer-environments-p1">previous post</a>, we discussed the systems we have had throughout the history of Shopify. In this follow up post we'll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify.</p>
+<h2 id="dev">Dev</h2>
+<p>Dev is</p></div>]]></description><link>https://devproductivity.io/shopify-developer-environments-p2/</link><guid isPermaLink="false">5a68eeb99ebe58002227a7f4</guid><category><![CDATA[Shopify]]></category><category><![CDATA[Developer Environments]]></category><dc:creator><![CDATA[Julian Nadeau]]></dc:creator><pubDate>Sun, 14 Jan 2018 20:41:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>In a <a href="https://devproductivity.io/shopify-developer-environments-p1">previous post</a>, we discussed the systems we have had throughout the history of Shopify. In this follow up post we'll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify.</p>
+<h2 id="dev">Dev</h2>
+<p>Dev is a command-line tool, mostly implemented in Ruby, with some shell integration supporting bash, zsh, and fish. It provides a set of commands to interact with the various projects under a GitHub account, including cloning, bootstrapping, running tests, booting servers, and shell integration to activate certain dependencies (e.g. particular Ruby, Go versions, or Node versions etc) when entering a project directory.</p>
+<p>Almost all active projects at Shopify are dev-enabled. If a developer wants to start working on one of these projects, they need to run only one command, dev up, to completely setup and update their development environment for the project. This includes everything from installing XCode to running pending database migrations.</p>
+<p>When we were making Dev, we had other previous tools in our recent memory. We looked at what we liked and what we didn’t. For example, we knew that a VM didn’t work well with code, but did with services which often caused the most issue. We created Railgun, an Xhyve based (<a href="https://github.com/mist64/xhyve">https://github.com/mist64/xhyve</a>) virtual machine that houses services such as MySQL, Redis, and Nginx. While creating a tool to interact with Railgun, we ended up developing Dev.</p>
+<h3 id="corephilosophies">Core Philosophies</h3>
+<p>We decided on a few base philosophies from the beginning:<br>
+<code>dev clone repo_name</code> will clone the repository.</p>
+<p>This will be our only interaction with Git as peoples’ flows vary, we want people to learn and remember Git, and cloning the repo allows us to control where repos are cloned and therefore lets us deterministically control the current directory</p>
+<ul>
+<li><code>dev up</code> will setup all dependencies so that a project is able to run</li>
+<li><code>dev run</code> or <code>dev server</code> will run the required systems to make a project run</li>
+<li><code>dev cd [name]</code> will change directory to a project</li>
+<li>If nothing needs to be done, <code>dev up</code> should take under 1s and ideally under 100ms</li>
+</ul>
+<p>These philosophies allowed us to maintain a great, consistent, and fast experience across all projects that specify a <code>dev.yml</code></p>
+<h3 id="devymlthespec">Dev.yml - the spec</h3>
+<p>dev.yml acts as a spec for a project. It defines what tasks need to be run during the up process and contains everything that dev needs to know about the project.<br>
+This is a segment of an example dev.yml file from a Ruby project:</p>
+<pre><code class="language-yaml"># up hash defines the sequence of tasks
+up:
+  - homebrew:
+    - shellcheck
+  - ruby: 2.4.1
+  - bundler
+
+# list of command aliases
+commands:
+  test: bin/testunit
+  style: &quot;bundle exec rubocop ; find . -name '*.sh' | grep -vE 'chruby|nvm' | xargs shellcheck&quot;
+</code></pre>
+<p>Running dev up in this project on a new machine will:</p>
+<ul>
+<li>Install homebrew</li>
+<li>Install shellcheck from homebrew</li>
+<li>Install ruby-install from homebrew (in the Ruby task)</li>
+<li>Install ruby 2.4.1 using ruby-install and a pre-compiled binary</li>
+<li>Activate ruby 2.4.1 using dev’s built-in chruby</li>
+<li>Install bundler using ruby 2.4.1</li>
+<li>Run bundle install</li>
+<li>Running dev up again, later, after modifying the project’s Gemfile will:</li>
+<li>Run bundle install, if anything has changed</li>
+</ul>
+<h3 id="currentstateofenvironment">Current state of Environment</h3>
+<p>As shown above, Dev has taken a little bit of each of the previous iterations. A Virtual Machine was used to house services such as MySQL and Redis, but the code remained on the system. This separation allowed us to split the focus from “what is needed to run this code?” to what dependencies are needed and what infrastructure is needed on the VM. This split made things a lot faster, and also allowed us to throw away infrastructure if they ever had an issue.</p>
+<p>Currently, the system we have is optimized in a few key locations. Let’s first talk about the system as a state machine. We have 3 key states: Stopped, Started, and Broken.</p>
+<ul>
+<li>Stopped: This is the default state when everything is off.</li>
+<li>Started: This is the state we want to get to and where everything should work.</li>
+<li>Broken: This is what happens when anything goes wrong.</li>
+</ul>
+<p>While each transition should be as quick as possible, we should be able to detect that a “start” will be successful or not as early as possible. Consequently, going from “This is broken” or “This is probably broken” should be as quick as possible - <code>rm -rf</code> everything and start again. This keeps complexity down and allows the possible states to be minimized for simplicity.</p>
+<p><img src="https://devproductivity.io/content/images/2018/01/Screen-Shot-2018-01-24-at-3.40.17-PM.png" alt="Screen-Shot-2018-01-24-at-3.40.17-PM"></p>
+<p>Our current system using Railgun and Dev is fairly reliable, accomplishes the above goals effectively, and requires little maintenance. The output is fairly straight forward, communicates intentions and information well, and is reliable most of the time. On the other hand, deviating outside of our normal configuration is difficult and not easy at all (near impossible with how you can change what Railgun runs). While this is not an issue on the surface, it does restrict what can be run and reduces the ability to innovate.</p>
+<p>Going over these past experiences allowed us to define a few key goals of an environment:</p>
+<ol>
+<li>Speed: We need to be able to change states quickly</li>
+<li>Reliability: We should be deterministic, be reproducible, and handle error states</li>
+<li>Simplicity: It should be simple to use and well documented</li>
+<li>(Nice to have if 1-3 are solved) Production parity: It is beneficial if it can be similar to production for education and debugging purposes</li>
+</ol>
+<p>With these past experiences, new set of goals, and understanding of the weak points of our current system we set out to find a better solution.</p>
+<hr>
+<p>In a follow up post, we will talk a little bit about how we're using these experiences to think forward to the future.</p>
+</div>]]></content:encoded></item><item><title><![CDATA[Historical Developer Environments at Shopify]]></title><description><![CDATA[<div class="kg-card-markdown"><p>Development operations at Shopify has a long history that winds its way through various systems, technologies, and iterations. Over the course of these iterations we have learned a number of lessons, experienced ups and downs, and ultimately ended up with a system that performs well.</p>
+<p>In this post, we’ll</p></div>]]></description><link>https://devproductivity.io/shopify-developer-environments-p1/</link><guid isPermaLink="false">5a68e9f29e89b900180655ad</guid><category><![CDATA[Shopify]]></category><category><![CDATA[Developer Environments]]></category><dc:creator><![CDATA[Julian Nadeau]]></dc:creator><pubDate>Sun, 14 Jan 2018 20:18:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>Development operations at Shopify has a long history that winds its way through various systems, technologies, and iterations. Over the course of these iterations we have learned a number of lessons, experienced ups and downs, and ultimately ended up with a system that performs well.</p>
+<p>In this post, we’ll discuss the systems we have had throughout the history of Shopify. In a follow up post we'll talk about the system we run today and we will have another post that includes a few forward thinking questions about developer operations at Shopify.</p>
+<h2 id="historicalsystems">Historical Systems</h2>
+<p>Throughout Shopify’s history, we have used 4 different systems to create and maintain developer systems. Each one has its own personality and optimized for different needs. We’ll discuss each system, explain some pros and cons of each system, and why we decided to switch from this platform.</p>
+<h3 id="artisansystems">Artisan Systems</h3>
+<p>In the earlier days of Shopify we had a few dozen developers and no automated environment setups. This system was quite ad hoc with the entire system being described in a hard coded list. When a developer started they would be handed a list of dependencies to install (e.g. install MySQL, install Homebrew, install Ruby version X however you want etc). There were some bin/setup scripts to automate some of this, but these bash scripts often broke. Moreover, as dependencies changed new sub-dependencies would be added without realizing it, so the developer would have to decrypt cryptic messages to determine what they need to install to continue.</p>
+<p>This system was quite error prone and meant that developers had divergent systems if they chose to install things differently. On the other hand, developers often learned quite a lot about the system, how it worked, and the macOS operating system (our OS of choice to this day).</p>
+<p>As the company grew, this system became cumbersome to execute and we often spent a long time setting laptops up. Finally, this cost became too much so we decided to consolidate this process using Boxen.</p>
+<h3 id="boxen">Boxen</h3>
+<p>Boxen (<a href="https://github.com/boxen/our-boxen/">https://github.com/boxen/our-boxen/</a>) is a tool that is implemented on top of Puppet (<a href="https://puppet.com/">https://puppet.com/</a>) and open source system configuration tool. The intention of Boxen is to wrap some of the more complicated parts of Puppet and allow repositories to include customization scripts.</p>
+<p>During our usage of Boxen, we saw the first signs of benefit from consolidating this configuration - developers could help each other a lot more easily with similar setups, we could merge changes to the setup and it would apply everywhere, etc. This allowed us to more easily maintain and deploy developer systems and we were able to move faster.</p>
+<p>Unfortunately, macOS is a complex system and running Puppet only added to that complexity. As the system began to run on more and more systems, we saw problems with things that users changed, and things that conflicted with Boxen/Puppet configuration. What made matters worse is that Puppet was not a well known or understood tool and we did not expect developers to learn it. This meant that when something went wrong people could not debug the system themselves. This is what caused us to seek a different alternative.</p>
+<p>Looking at the issues we experienced with Boxen, it was clear to us that we had to allow developers to modify the system (they’ll do this regardless), have a consolidated experience, have a system that people understood, and we also desired a more similar configuration to production. This led us to Vagrant.</p>
+<h3 id="vagrant">Vagrant</h3>
+<p>Vagrant (<a href="https://www.vagrantup.com/">https://www.vagrantup.com/</a>) was our answer to Boxen. Vagrant is a virtualized system that allows projects to be run within the confines of a virtual machine (VM). An included configuration file can allow a developer to simply start with a ‘vagrant up’ command which would initialize a production-similar system with all dependencies and code. With this setup, all code and dependencies ran inside of a VM which allowed the developer to modify their system in any way without impacting the VM itself. This was a solution that hit all of our requirements of consolidation, production similarity, consolidated configuration, and a system that people understood (more on this in a moment).</p>
+<p>Vagrant, for Shopify, was generated from our production Chef (<a href="https://www.chef.io/chef/">https://www.chef.io/chef/</a>) configurations. Our entire operations team understood how this system worked, so we were able to modify and change the system readily. This also meant that we had a production-development parity. Unfortunately, our production environments often did not take our Vagrant environments into account and we consistently broke developer laptops. Moreover, as the development team grew there became more of a disparity between the number of operations engineers who knew Chef and the number of developers.</p>
+<p>We also had other issues with Vagrant. With the code hosted in the VM but the text editors and IDEs on the host machine, we were required to mount an NFS drive from the VM on the local machine. This ended up causing issues with syncing and file changes were often not picked up which resulted in a lot of lost productivity and time in debugging errors from the system.</p>
+<p>We ended up deciding that Vagrant was not a proper solution due to the NFS issues and the constant breakage. We sought a new solution and researched a new alternative. From this time, dev and Railgun were created.</p>
+</div>]]></content:encoded></item><item><title><![CDATA[The Future of Developer Environments at Shopify]]></title><description><![CDATA[<div class="kg-card-markdown"><p>In the previous posts we talked about our past experiences with <a href="https://devproductivity.io/shopify-developer-environments-p1/">Artisinal Systems, Boxen, and Vagrant</a> as well as our <a href="https://devproductivity.io/shopify-developer-environments-p2/">current system using Railgun and Dev</a>. In this post, we're going to talk about some future plans and give a few forward thoughts.</p>
+<p>Railgun and Dev accomplish most goals most</p></div>]]></description><link>https://devproductivity.io/the-future-of-developer-environments-at-shopify/</link><guid isPermaLink="false">5a6b7d60c9a8670022be5322</guid><category><![CDATA[Shopify]]></category><category><![CDATA[Developer Environments]]></category><dc:creator><![CDATA[Julian Nadeau]]></dc:creator><pubDate>Sun, 14 Jan 2018 19:14:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><p>In the previous posts we talked about our past experiences with <a href="https://devproductivity.io/shopify-developer-environments-p1/">Artisinal Systems, Boxen, and Vagrant</a> as well as our <a href="https://devproductivity.io/shopify-developer-environments-p2/">current system using Railgun and Dev</a>. In this post, we're going to talk about some future plans and give a few forward thoughts.</p>
+<p>Railgun and Dev accomplish most goals most of the time. We do not allow enough room for innovation or differing tech stacks. How can we allow more teams to innovate while making the normal tech stack glaringly easy to use? We have a few ideas which we’ll discuss below.</p>
+<h2 id="minikube">Minikube</h2>
+<p>Minikube is a system built on top of Kubernetes, a container scheduling system. With our current operations being built on top of Kubernetes, this seemed like a good opportunity to consolidate developer and production environments, educate our engineering department about Kubernetes, and give customizability to environments.</p>
+<p>This presented us with a unique opportunity to provide some alleviation from our previous issues while also giving a perfect spot for people to learn about Kubernetes. We rolled out a beta version of this system to a number of users to collect data, learn about weak points, and provide more overall context of the system.</p>
+<p>Unfortunately, the beta resulted in poor performance in a number of aspects. We experienced issues in a number of areas, which are listed below:</p>
+<ul>
+<li>Previously, we mentioned that the “Broken” to “Stopped” state needs to be fast, however with Minikube we could not accomplish this. It would sometimes take far too long to return to a default state and this unfortunately happened too often. One reason for this is that Minikube used Kubenetes default behaviour to try and “self heal” while we have no issues with simply killing the system and rebooting from scratch. There were also far more failure scenarios.</li>
+<li>The first boot was exceptionally painful. Minikube relied a lot on external factors that we could not control and for which Mac provided little guidance. This often caused the initial install to fail and be very painful.</li>
+<li>Dynamic Host Configuration Protocol (DHCP) failed often and caused conflicts with other resources trying to use the same system (namely Railgun conflicted a lot).</li>
+<li>Pulling containers took a lot time, as did Minikube ISO images. This caused a lot of contention and would not work well with our remote developers.</li>
+</ul>
+<p>In the end, we decided to call our own sunk cost fallacy and abandoned the effort. However, The system was left in place for us to use in infrastructure related experiments.</p>
+<h2 id="onlinedeveloperenvironment">Online Developer Environment</h2>
+<p>Minikube provided us with a good entry point into Kubernetes, but failed on setup due to time constraints and flaky scenarios. Using this experience, we prototyped a remote developer environment where the services such as MySQL and Redis would run in the cloud. This experiment proved an overall success, but brings a lot of uncertainty. What is the impact on the network round trip? What happens to developers using a poor internet connection? We take away offline capabilities - though we deemed this acceptable. In the end, we kept the work as an experiment and decided to work on Railgun V2 instead.</p>
+<h2 id="railgunv2">Railgun V2</h2>
+<p>Railgun provides a lot of benefit with little downside. If we look at our goals, production equivalence is a nice to have after the other goals so we decided to work down this path some more. Railgun V2 is being designed around Docker instead of a custom virtual machine. Docker will provide us an easy way to use any containers that we build into our Google Cloud Container Registry. This means that the default environment and services will be available by default and other environments are able to be used granted they are uploaded to our container registry. So far, we even gained a few seconds in performance in boot.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>In the end, it becomes apparent that scaling a developer environment is not a trivial task. Each system is uncontrolled and brings with it a varied setup. Going into a solution, we need to keep in mind that we need to make the experience quick and easy for the everyday developer, but keep in mind that our own maintenance burden cannot suffer either. While our current solution using Dev and Railgun is good, we can aim to be better and will be working towards a more customizable, quick, and well communicated system.</p>
+</div>]]></content:encoded></item><item><title><![CDATA[Slack and Meetups]]></title><description><![CDATA[<div class="kg-card-markdown"><p>We have an open Slack group you can join at <a href="https://chat.devproductivity.io">https://chat.devproductivity.io</a></p>
+<hr>
+<h4 id="meetups">Meetups</h4>
+<ul>
+<li>January 2018
+<ul>
+<li><a href="https://devproductivity.io/2-76x-developer-habits-of-a-productive-developer/">Chris Morris: 2.76x Developer: Habits of a productive developer</a></li>
+<li><a href="https://devproductivity.io/the-story-of-datadogs-developer-productivity-team/">Dan Benamy: The Story of Datadog's Developer Productivity Team</a></li>
+<li><a href="https://devproductivity.io/chat-ops-and-developer-productivity/">John Arthorne: Chat Ops and Developer Productivity</a></li>
+</ul>
+</li>
+</ul>
+</div>]]></description><link>https://devproductivity.io/slack-and-meetups/</link><guid isPermaLink="false">5a6fd306c9a8670022be5330</guid><dc:creator><![CDATA[Developer Productivity]]></dc:creator><pubDate>Mon, 01 Jan 2018 02:08:00 GMT</pubDate><media:content url="https://images.unsplash.com/photo-1483009361514-e08892350caa?ixlib=rb-0.3.5&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=1080&amp;fit=max&amp;ixid=eyJhcHBfaWQiOjExNzczfQ&amp;s=1d3a025d6fdfa9b286d4e6a60f2f5071" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><img src="https://images.unsplash.com/photo-1483009361514-e08892350caa?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ&s=1d3a025d6fdfa9b286d4e6a60f2f5071" alt="Slack and Meetups"><p>We have an open Slack group you can join at <a href="https://chat.devproductivity.io">https://chat.devproductivity.io</a></p>
+<hr>
+<h4 id="meetups">Meetups</h4>
+<ul>
+<li>January 2018
+<ul>
+<li><a href="https://devproductivity.io/2-76x-developer-habits-of-a-productive-developer/">Chris Morris: 2.76x Developer: Habits of a productive developer</a></li>
+<li><a href="https://devproductivity.io/the-story-of-datadogs-developer-productivity-team/">Dan Benamy: The Story of Datadog's Developer Productivity Team</a></li>
+<li><a href="https://devproductivity.io/chat-ops-and-developer-productivity/">John Arthorne: Chat Ops and Developer Productivity</a></li>
+</ul>
+</li>
+</ul>
+</div>]]></content:encoded></item><item><title><![CDATA[Plans]]></title><description><![CDATA[<div class="kg-card-markdown"><ul>
+<li><a href="#what-is-this-for">What is this for?</a></li>
+<li><a href="#who-will-build-this-who-will-be-responsible-for-it">Who will build this, who will be responsible for it?</a></li>
+<li><a href="#high-level-goals-of-the-website">High Level Goals of the Website</a></li>
+<li><a href="#what-are-case-studies">What are “Case Studies”?</a></li>
+<li><a href="#site-layout">Site Layout</a></li>
+</ul>
+<hr>
+<h2 id="whatisthisfor">What is this for?</h2>
+<p>Developer Acceleration, or Productivity, has no home or place to find information. This website will be the central hub on</p></div>]]></description><link>https://devproductivity.io/plans/</link><guid isPermaLink="false">5a6fce58c9a8670022be532f</guid><dc:creator><![CDATA[Developer Productivity]]></dc:creator><pubDate>Mon, 01 Jan 2018 01:46:00 GMT</pubDate><content:encoded><![CDATA[<div class="kg-card-markdown"><ul>
+<li><a href="#what-is-this-for">What is this for?</a></li>
+<li><a href="#who-will-build-this-who-will-be-responsible-for-it">Who will build this, who will be responsible for it?</a></li>
+<li><a href="#high-level-goals-of-the-website">High Level Goals of the Website</a></li>
+<li><a href="#what-are-case-studies">What are “Case Studies”?</a></li>
+<li><a href="#site-layout">Site Layout</a></li>
+</ul>
+<hr>
+<h2 id="whatisthisfor">What is this for?</h2>
+<p>Developer Acceleration, or Productivity, has no home or place to find information. This website will be the central hub on which to share and collaborate on guidelines, blogs, and other developer productivity information with the developer productivity community.</p>
+<h2 id="whowillbuildthiswhowillberesponsibleforit">Who will build this, who will be responsible for it?</h2>
+<ul>
+<li>Shopify will be paying for the creation of the website and the costs for the first year at minimum</li>
+<li>The site will be administered by a collection of volunteers from various organizations. (Interested in helping out? Ping @julian on Slack!)</li>
+<li>This is a website for the community, it will not be branded as Shopify (save for maybe a sponsored by icon in the footer). We want the community to own it, but that doesn't mean we won't invest our time in it either</li>
+</ul>
+<h2 id="highlevelgoalsofthewebsite">High Level Goals of the Website</h2>
+<ul>
+<li>Be a place where people can learn about developer productivity</li>
+<li>Case Studies and best practices of different developer productivity teams that can help small to large companies build out their tools</li>
+<li>Showcase the diversity of developer productivity in both the people and teams
+<ul>
+<li>Case studies will be about different teams - whether it’s one person dedicated, a small team, a department - there’s a natural progression in team size that seems to occur and we want to showcase this progression</li>
+<li>Case studies will be about a variety of people of different backgrounds, genders, ethnicities, etc</li>
+<li>Different companies have different tech stacks. What's the same? What's different?</li>
+</ul>
+</li>
+<li>Be a place where we can post blog articles for all our different site sections (CI/Testing, Mobile, Developer environments, etc), tagged appropriately, appearing on both the home page and their respective site sections</li>
+<li>Allow the entire developer productivity community to collaborate together. Administrators from various companies will be chosen to moderate and maintain the website. Everyone else will be able to sign up to contribute to the website (sort of like a pull request for content)</li>
+<li>Host an event schedule for online meetups (and share recordings and materials afterwards) as well as other relevant events, such as a conference.</li>
+</ul>
+<h2 id="whatarecasestudies">What are “Case Studies”?</h2>
+<p>Companies are at different sizes. Some are a few people, some are hundreds, some are thousands - what does developer productivity mean at these sizes?</p>
+<p>Through community effort, we can document some of the best practices we learned in a sort of “case study”. These are self-documented guides and resources that teams at various companies used. These can be interviews of team members. These can be styleguides and resources. It's really up to the team.</p>
+<p>Think of it like a “life story” for developer productivity at a company</p>
+<h2 id="sitelayout">Site Layout</h2>
+<p>There will be a few sections, some of which will need to support categorization (like style guide, blog, etc).</p>
+<p>Here is a map:</p>
+<ul>
+<li>Homebase
+<ul>
+<li>Case Studies</li>
+<li>Recent Blog posts</li>
+<li>Upcoming events</li>
+<li>Recent Past Events</li>
+</ul>
+</li>
+<li>Join us on Slack (<a href="https://chat.devproductivity.io">chat.devproductivity.io</a>, uses <a href="https://github.com/rauchg/slackin">https://github.com/rauchg/slackin</a> and can include widgets on any page)</li>
+<li>Case Studies/Best Practices
+<ul>
+<li>Categorized by companies</li>
+<li>Further categorized by topics, like seen above</li>
+<li>Possibly more categories like <a href="https://docs.google.com/a/shopify.com/document/d/1F4RYQsL-IMqJTk1k0bkP2EkzK7wVLYH23u2BRfUFgRw/edit?usp=sharing">this doc</a></li>
+</ul>
+</li>
+<li>Blog posts
+<ul>
+<li>Tagged by categories</li>
+</ul>
+</li>
+<li>Event Calendar and materials
+<ul>
+<li>Likely not a month calendar, not enough events</li>
+<li>Upcoming events (?)</li>
+<li>Past events (and links to materials, recordings)</li>
+</ul>
+</li>
+<li>Useful materials, links, etc</li>
+</ul>
+</div>]]></content:encoded></item><item><title><![CDATA[What is Developer Productivity?]]></title><description><![CDATA[<div class="kg-card-markdown"><ul>
+<li><a href="#developer-productivity">Developer Productivity</a>
+<ul>
+<li><a href="#what-is-developer-productivity">What is Developer Productivity?</a></li>
+<li><a href="#vision-for-this-community">Vision</a></li>
+<li><a href="#phase-i">Phase I</a></li>
+<li><a href="#phase-ii">Phase II</a></li>
+<li><a href="#phase-iii">Phase III</a></li>
+<li><a href="#phase-n">Phase N</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>Productivity is defined as “the effectiveness of productive effort, especially in industry, as measured in terms of the rate of output per unit of input.” Therefore, developer Productivity can be described as a concept, set</p></div>]]></description><link>https://devproductivity.io/what-is-developer-productivity/</link><guid isPermaLink="false">5a6fc696c9a8670022be532d</guid><dc:creator><![CDATA[Developer Productivity]]></dc:creator><pubDate>Mon, 01 Jan 2018 01:13:00 GMT</pubDate><media:content url="https://images.unsplash.com/photo-1507099985932-87a4520ed1d5?ixlib=rb-0.3.5&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb&amp;w=1080&amp;fit=max&amp;ixid=eyJhcHBfaWQiOjExNzczfQ&amp;s=16c9851bdf1a4883a2ec97cdbfd8cb0e" medium="image"/><content:encoded><![CDATA[<div class="kg-card-markdown"><ul>
+<li><a href="#developer-productivity">Developer Productivity</a>
+<ul>
+<li><a href="#what-is-developer-productivity">What is Developer Productivity?</a></li>
+<li><a href="#vision-for-this-community">Vision</a></li>
+<li><a href="#phase-i">Phase I</a></li>
+<li><a href="#phase-ii">Phase II</a></li>
+<li><a href="#phase-iii">Phase III</a></li>
+<li><a href="#phase-n">Phase N</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<img src="https://images.unsplash.com/photo-1507099985932-87a4520ed1d5?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ&s=16c9851bdf1a4883a2ec97cdbfd8cb0e" alt="What is Developer Productivity?"><p>Productivity is defined as “the effectiveness of productive effort, especially in industry, as measured in terms of the rate of output per unit of input.” Therefore, developer Productivity can be described as a concept, set of tools or processes, or a team that is dedicated to enhancing the efficiency of other developers with the goal of allowing them to increase their overall output.</p>
+<p>This concept and the responsibilities of the team in charge of developer productivity can be varied throughout different companies, however after a number of meetings it became clear that the teams mostly focus on a few key areas. Unfortunately, the developers at different companies don’t seem to discuss, have meet-ups, or work together on allied goals.</p>
+<p>Developer productivity is not a business concern nor is most of the work confidential. The work is generally generic and the concepts are easily shared and discussed. Over the course of many meetings with similar teams at other companies, it became obvious that we’re all duplicating each others’ work and more importantly we’re duplicating the exploration.</p>
+<h2 id="visionforthiscommunity">Vision for this Community</h2>
+<p>Developer Productivity is not a business concern and it is not specific to any company. The concepts are shareable and can help reduce time to explore, gain more feedback and expertise, and allow us to help define standards in the industry.</p>
+<p>If we work together in creating a community and a set of community guidelines - we will all benefit.</p>
+<hr>
+<h2 id="phasei">Phase I</h2>
+<p>Phase I is simply the initial foundation of the community. The Slack channel, invitations at <a href="https://chat.devproductivity.io">https://chat.devproductivity.io</a>, is a good first step towards an initial foundation.</p>
+<p>As we grow the audience, we can start to hold online meet-ups. The first one is currently scheduled for sometime in January 2018.</p>
+<p>These simple ideas will allow us to start to grow a community and provide the foundations to introduce work on additional phases of the project.</p>
+<blockquote>
+<p><strong>Success Criteria:</strong> The community starts to grow and people remain excited. There is a decent turnout for the online meet-ups and people are asking what comes next.</p>
+</blockquote>
+<h2 id="phaseii">Phase II</h2>
+<p>There is no current ground work laid to bootstrap a community dedicated to developer productivity. This means that we have the opportunity to create this community and share the work we do with each other.</p>
+<p><a href="https://devproductivity.io">https://devproductivity.io</a> will be a central hub managed by the community. With links to content about continuous integration and testing, automation, operational excellence, developer environments, mobile tooling, and other aspects of developer productivity - this website will be a central location on which to grow a solid foundation.</p>
+<p>This website/community allows us to draw talent and work from the larger pool of engineers working on the same goals, it also allows us to share our ideas, and educate the larger developer community about standard goals.</p>
+<p>This website is envisioned to be a handbook or styleguide for all people working on developer productivity. With a website similar to <a href="https://fastlane.tools">https://fastlane.tools</a> or <a href="https://polaris.shopify.com">https://polaris.shopify.com</a>, we will gain the ability to communicate industry best practices and crowd source their definitions. Moreover, we can expand the website to include blogs (written by the community members!), useful papers and links, forums, and other useful materials.</p>
+<blockquote>
+<p><strong>Success Criteria:</strong> The community gets excited about the website and we start to see traffic pick up. The community will start to become more involved and take ownership of parts of the content once the initial site is launched.</p>
+</blockquote>
+<h2 id="phaseiii">Phase III</h2>
+<p>As we grow, online meet-ups will likely not scale and people will want to have more meaningful in person collaborations and discussions. The website will need more community to continue to scale and continue to be a place that people frequent.</p>
+<p>In Phase III, we hold our first conference. Development has had conferences of so many varieties, but there has never been a conference dedicated to the concepts that form developer productivity. That being said some conferences, such as Velocity and DevDaysTO, dedicate portions of their content towards developer productivity but no known conference is targetted specifically towards developer productivity.</p>
+<p>By holding the conference, we aim to become a driving force behind Developer Productivity and increase community knowledge and commitment to this community.</p>
+<blockquote>
+<p><strong>Success Criteria:</strong> We see excitement and participation. The website and the content continues to increase in traffic and a vibrant community is formed.</p>
+</blockquote>
+<h2 id="phasen">Phase N</h2>
+<p>We may not need to go much further than a conference. If these phases are successful, we may have found a recipe to continue to grow and continue to be a power house in the developer productivity community.</p>
+<p>We also don’t have all of the ideas and don’t want to be prescriptive about how the community grows. We want to see how it naturally grows and in what direction the community wants to grow.</p>
+</div>]]></content:encoded></item></channel></rss>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Current Developer Environments at Shopify</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link href="https://fonts.googleapis.com/css?family=Droid+Serif:400,400italic,700,700italic%7CMontserrat:400,700" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="../assets/css/style.css@v=eb72bba485.css" />
+
+	<script type="text/javascript">
+		var disqus_shortname = 'developer-productivity', // replace my_disqus_shortname with your shortname
+			instagram_user_id = '', // add your Instagram user ID
+			instagram_access_token = ''; // add your Instagram access token
+	</script>
+
+	<link rel="shortcut icon" href="../favicon.png" type="image/png" />
+    <link rel="canonical" href="index.html" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="amp/index.html" />
+    
+    <meta property="og:site_name" content="Developer Productivity" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Current Developer Environments at Shopify" />
+    <meta property="og:description" content="In a previous post, we discussed the systems we have had throughout the history of Shopify. In this follow up post we&#x27;ll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify. Dev Dev is" />
+    <meta property="og:url" content="https://devproductivity.io/shopify-developer-environments-p2/" />
+    <meta property="article:published_time" content="2018-01-14T20:41:00.000Z" />
+    <meta property="article:modified_time" content="2018-01-30T05:35:34.000Z" />
+    <meta property="article:tag" content="Shopify" />
+    <meta property="article:tag" content="Developer Environments" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Current Developer Environments at Shopify" />
+    <meta name="twitter:description" content="In a previous post, we discussed the systems we have had throughout the history of Shopify. In this follow up post we&#x27;ll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify. Dev Dev is" />
+    <meta name="twitter:url" content="https://devproductivity.io/shopify-developer-environments-p2/" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Julian Nadeau" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Shopify, Developer Environments" />
+    <meta name="twitter:site" content="@devproductivity" />
+    <meta name="twitter:creator" content="@jules2689" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Developer Productivity",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://devproductivity.io/content/images/2018/01/logo-1-1.png",
+            "width": 60,
+            "height": 60
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Julian Nadeau",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/06f56d035ff1a0b0fa652508019aac94?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://devproductivity.io/author/julian/",
+        "sameAs": [
+            "https://jnadeau.ca",
+            "https://twitter.com/jules2689"
+        ]
+    },
+    "headline": "Current Developer Environments at Shopify",
+    "url": "https://devproductivity.io/shopify-developer-environments-p2/",
+    "datePublished": "2018-01-14T20:41:00.000Z",
+    "dateModified": "2018-01-30T05:35:34.000Z",
+    "keywords": "Shopify, Developer Environments",
+    "description": "In a previous post, we discussed the systems we have had throughout the history of Shopify. In this follow up post we&#x27;ll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify. Dev Dev is",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://devproductivity.io/"
+    }
+}
+    </script>
+
+    
+    <link rel="alternate" type="application/rss+xml" title="Developer Productivity" href="../rss/index.html" />
+    <meta name="google-site-verification" content="X_Ag2Sd2pE0MGDg2otSMuVmUsRJt8aImUfPGuia6wiU" />
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-114643274-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-114643274-1');
+</script>
+</head>
+<body class="post-template tag-shopify tag-developer-environments">
+	<div id="page" class="site">
+		<header class="site-header">
+	<div class="inner-wide">
+		<p class="site-logo"><a href="../index.html"><img src="../content/images/2018/01/logo-1-1.png" alt="Developer Productivity" />&nbsp; Developer Productivity</a></p>
+			<nav class="site-navigation" aria-label="Main Menu">
+	<h2 class="screen-reader-text">Explore Website</h2>
+	<ul class="menu">
+		<li class="menu-item home" role="presentation"><a href="../index.html">Home</a></li>
+		<li class="menu-item what-is-it" role="presentation"><a href="../what-is-developer-productivity/index.html">What is it?</a></li>
+		<li class="menu-item focus-areas" role="presentation"><a href="../focus-areas/index.html">Focus Areas</a></li>
+		<li class="menu-item company-case-studies" role="presentation"><a href="../companies/index.html">Company Case Studies</a></li>
+		<li class="menu-item slack-meetups" role="presentation"><a href="../slack-and-meetups/index.html">Slack &amp; Meetups</a></li>
+    <li class="menu-item"><a href="https://chat.devproductivity.io"><img src="https://chat.devproductivity.io/badge.svg"></a></li>
+	</ul><!-- .menu -->
+</nav><!-- .site-navigation -->
+
+		<a class="search-toggle" href="index.html#"><span class="screen-reader-text">Search</span><span class="icon-search" aria-hidden="true"></span></a>
+		<a class="sidebar-toggle" href="index.html#"><span class="screen-reader-text">Open Sidebar</span><span class="icon-nav-custom" aria-hidden="true"></span></a>
+	</div><!-- .inner-wide -->
+</header><!-- .site-header -->
+		
+<main class="site-main">
+	<div class="site-content">
+
+		<article class="post tag-shopify tag-developer-environments">
+			<header class="cover post-header">
+				<div class="cover-content">
+					<div class="inner">
+						<div class="post-tags">
+							<a href="../tag/shopify/index.html">Shopify</a><a href="../tag/developer-environments/index.html">Developer Environments</a>
+						</div><!-- .post-tags -->
+						<h1 class="post-title">Current Developer Environments at Shopify</h1>
+						<div class="post-meta">
+							by <span class="post-author"><a href="../author/julian/index.html">Julian Nadeau</a></span> on <time class="published" datetime="2018-01-14">January 14, 2018</time> <span class="reading-time">4 min read</span>
+						</div><!-- .post-meta -->
+						<a href="index.html#" class="scroll-down square light"><span class="icon-down-custom" aria-hidden="true"></span><span class="screen-reader-text">Scroll Down</span></a>
+					</div><!-- .inner -->
+				</div><!-- .cover-content -->
+			</header><!-- .cover -->
+
+			<div class="post-content inner">
+				<div class="kg-card-markdown"><p>In a <a href="../shopify-developer-environments-p1.html">previous post</a>, we discussed the systems we have had throughout the history of Shopify. In this follow up post we'll talk about the system we run today. Finally, we will have another post that includes a few forward thinking questions about developer operations at Shopify.</p>
+<h2 id="dev">Dev</h2>
+<p>Dev is a command-line tool, mostly implemented in Ruby, with some shell integration supporting bash, zsh, and fish. It provides a set of commands to interact with the various projects under a GitHub account, including cloning, bootstrapping, running tests, booting servers, and shell integration to activate certain dependencies (e.g. particular Ruby, Go versions, or Node versions etc) when entering a project directory.</p>
+<p>Almost all active projects at Shopify are dev-enabled. If a developer wants to start working on one of these projects, they need to run only one command, dev up, to completely setup and update their development environment for the project. This includes everything from installing XCode to running pending database migrations.</p>
+<p>When we were making Dev, we had other previous tools in our recent memory. We looked at what we liked and what we didn’t. For example, we knew that a VM didn’t work well with code, but did with services which often caused the most issue. We created Railgun, an Xhyve based (<a href="https://github.com/mist64/xhyve">https://github.com/mist64/xhyve</a>) virtual machine that houses services such as MySQL, Redis, and Nginx. While creating a tool to interact with Railgun, we ended up developing Dev.</p>
+<h3 id="corephilosophies">Core Philosophies</h3>
+<p>We decided on a few base philosophies from the beginning:<br>
+<code>dev clone repo_name</code> will clone the repository.</p>
+<p>This will be our only interaction with Git as peoples’ flows vary, we want people to learn and remember Git, and cloning the repo allows us to control where repos are cloned and therefore lets us deterministically control the current directory</p>
+<ul>
+<li><code>dev up</code> will setup all dependencies so that a project is able to run</li>
+<li><code>dev run</code> or <code>dev server</code> will run the required systems to make a project run</li>
+<li><code>dev cd [name]</code> will change directory to a project</li>
+<li>If nothing needs to be done, <code>dev up</code> should take under 1s and ideally under 100ms</li>
+</ul>
+<p>These philosophies allowed us to maintain a great, consistent, and fast experience across all projects that specify a <code>dev.yml</code></p>
+<h3 id="devymlthespec">Dev.yml - the spec</h3>
+<p>dev.yml acts as a spec for a project. It defines what tasks need to be run during the up process and contains everything that dev needs to know about the project.<br>
+This is a segment of an example dev.yml file from a Ruby project:</p>
+<pre><code class="language-yaml"># up hash defines the sequence of tasks
+up:
+  - homebrew:
+    - shellcheck
+  - ruby: 2.4.1
+  - bundler
+
+# list of command aliases
+commands:
+  test: bin/testunit
+  style: &quot;bundle exec rubocop ; find . -name '*.sh' | grep -vE 'chruby|nvm' | xargs shellcheck&quot;
+</code></pre>
+<p>Running dev up in this project on a new machine will:</p>
+<ul>
+<li>Install homebrew</li>
+<li>Install shellcheck from homebrew</li>
+<li>Install ruby-install from homebrew (in the Ruby task)</li>
+<li>Install ruby 2.4.1 using ruby-install and a pre-compiled binary</li>
+<li>Activate ruby 2.4.1 using dev’s built-in chruby</li>
+<li>Install bundler using ruby 2.4.1</li>
+<li>Run bundle install</li>
+<li>Running dev up again, later, after modifying the project’s Gemfile will:</li>
+<li>Run bundle install, if anything has changed</li>
+</ul>
+<h3 id="currentstateofenvironment">Current state of Environment</h3>
+<p>As shown above, Dev has taken a little bit of each of the previous iterations. A Virtual Machine was used to house services such as MySQL and Redis, but the code remained on the system. This separation allowed us to split the focus from “what is needed to run this code?” to what dependencies are needed and what infrastructure is needed on the VM. This split made things a lot faster, and also allowed us to throw away infrastructure if they ever had an issue.</p>
+<p>Currently, the system we have is optimized in a few key locations. Let’s first talk about the system as a state machine. We have 3 key states: Stopped, Started, and Broken.</p>
+<ul>
+<li>Stopped: This is the default state when everything is off.</li>
+<li>Started: This is the state we want to get to and where everything should work.</li>
+<li>Broken: This is what happens when anything goes wrong.</li>
+</ul>
+<p>While each transition should be as quick as possible, we should be able to detect that a “start” will be successful or not as early as possible. Consequently, going from “This is broken” or “This is probably broken” should be as quick as possible - <code>rm -rf</code> everything and start again. This keeps complexity down and allows the possible states to be minimized for simplicity.</p>
+<p><img src="../content/images/2018/01/Screen-Shot-2018-01-24-at-3.40.17-PM.png" alt="Screen-Shot-2018-01-24-at-3.40.17-PM"></p>
+<p>Our current system using Railgun and Dev is fairly reliable, accomplishes the above goals effectively, and requires little maintenance. The output is fairly straight forward, communicates intentions and information well, and is reliable most of the time. On the other hand, deviating outside of our normal configuration is difficult and not easy at all (near impossible with how you can change what Railgun runs). While this is not an issue on the surface, it does restrict what can be run and reduces the ability to innovate.</p>
+<p>Going over these past experiences allowed us to define a few key goals of an environment:</p>
+<ol>
+<li>Speed: We need to be able to change states quickly</li>
+<li>Reliability: We should be deterministic, be reproducible, and handle error states</li>
+<li>Simplicity: It should be simple to use and well documented</li>
+<li>(Nice to have if 1-3 are solved) Production parity: It is beneficial if it can be similar to production for education and debugging purposes</li>
+</ol>
+<p>With these past experiences, new set of goals, and understanding of the weak points of our current system we set out to find a better solution.</p>
+<hr>
+<p>In a follow up post, we will talk a little bit about how we're using these experiences to think forward to the future.</p>
+</div>
+			</div><!-- .post-content -->
+
+				<footer class="post-footer inner">
+					<div class="share-post">
+						<span>Share</span>
+						<a class="square" target="_blank" href="https://twitter.com/intent/tweet?text=Current%20Developer%20Environments%20at%20Shopify&amp;url=https://devproductivity.io/shopify-developer-environments-p2/"><i class="icon-twitter" aria-hidden="true"></i><span class="screen-reader-text">Share on Twitter</span></a>
+						<a class="square" target="_blank" href="https://www.facebook.com/sharer.php?u=https://devproductivity.io/shopify-developer-environments-p2/"><i class="icon-facebook" aria-hidden="true"></i><span class="screen-reader-text">Share on Facebook</span></a>
+						<a class="square" target="_blank" href="https://plus.google.com/share?url=https://devproductivity.io/shopify-developer-environments-p2/"><i class="icon-google" aria-hidden="true"></i><span class="screen-reader-text">Share on Google+</span></a>
+					</div>
+						<div class="author-box">
+							<img src="https://www.gravatar.com/avatar/06f56d035ff1a0b0fa652508019aac94?s=250&amp;d=mm&amp;r=x" alt="Julian Nadeau's Picture" class="author-avatar" />
+							<h2 class="author-title">About <a href="../author/julian/index.html">Julian Nadeau</a></h2>
+							<p class="author-description">Julian is a Production Engineer at Shopify working on developer productivity.</p>
+							<p class="author-links">
+								<span class="author-location"><i class="icon-map-marker" aria-hidden="true"></i> Shopify - Canada</span>
+								<span class="author-website"><i class="icon-chain" aria-hidden="true"></i> <a href="https://jnadeau.ca" target="_blank">https://jnadeau.ca</a></span>
+								<span class="author-twitter"><i class="icon-twitter" aria-hidden="true"></i> <a href="https://twitter.com/jules2689" target="_blank">Twitter</a></span>
+							</p>
+						</div>
+			</footer><!-- .post-footer -->
+		</article><!-- .post -->
+
+
+		<section class="comments-area inner">
+	<h2 class="comments-title"><span class="icon-plus-custom" aria-hidden="true"></span> Comments</h2>
+	<div id="disqus_thread"></div>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus</a>.</noscript>
+</section><!-- .comments-area -->
+
+
+			<nav class="post-navigation">
+				<a href="../2-76x-developer-habits-of-a-productive-developer/index.html" class="nav-next">
+					<div class="nav-bg" style="background-image: url(../content/images/2018/02/duotone--2-.png)"></div>
+					<div class="nav-inside">
+						<span class="nav-before">Next</span><span class="nav-title">2.76x Developer: Habits of a productive developer</span><span class="nav-date">January 15, 2018</span>
+					</div>
+				</a>
+				<a href="../shopify-developer-environments-p1.html" class="nav-previous">
+					<div class="nav-inside">
+						<span class="nav-before">Previous</span><span class="nav-title">Historical Developer Environments at Shopify</span><span class="nav-date">January 14, 2018</span>
+					</div>
+				</a>
+			</nav><!-- .post-navigation -->
+
+	</div><!-- .site-content -->
+</main><!-- .site-main -->
+
+		<aside class="sidebar" aria-label="Sidebar">
+	<div class="sidebar-scrollable">
+		<div class="widget-area">
+				<nav class="site-navigation" aria-label="Main Menu">
+	<h2 class="screen-reader-text">Explore Website</h2>
+	<ul class="menu">
+		<li class="menu-item home" role="presentation"><a href="../index.html">Home</a></li>
+		<li class="menu-item what-is-it" role="presentation"><a href="../what-is-developer-productivity/index.html">What is it?</a></li>
+		<li class="menu-item focus-areas" role="presentation"><a href="../focus-areas/index.html">Focus Areas</a></li>
+		<li class="menu-item company-case-studies" role="presentation"><a href="../companies/index.html">Company Case Studies</a></li>
+		<li class="menu-item slack-meetups" role="presentation"><a href="../slack-and-meetups/index.html">Slack &amp; Meetups</a></li>
+    <li class="menu-item"><a href="https://chat.devproductivity.io"><img src="https://chat.devproductivity.io/badge.svg"></a></li>
+	</ul><!-- .menu -->
+</nav><!-- .site-navigation -->
+
+			<section class="widget widget-text">
+				<h2 class="widget-title">About Developer Productivity</h2>
+				<p>Productivity is defined as “the effectiveness of productive effort, especially in industry, as measured in terms of the rate of output per unit of input.” Therefore, developer Productivity can be described as a concept, set of tools or processes, or a team that is dedicated to enhancing the efficiency of other developers with the goal of allowing them to increase their overall output.</p>
+
+				<p>This concept and the responsibilities of the team in charge of developer productivity can be varied throughout different companies, however after a number of meetings it became clear that the teams mostly focus on a few key areas. Unfortunately, the developers at different companies don’t seem to discuss, have meet-ups, or work together on allied goals.</p>
+
+				<a href="../what-is-developer-productivity/index.html">Read More</a>
+			</section><!-- .widget -->
+		</div><!-- .widget-area -->
+		<a class="sidebar-toggle" href="index.html#"><span class="screen-reader-text">Close Sidebar</span><span aria-hidden="true" class="icon-close-custom"></span></a>
+	</div><!-- .sidebar-scrollable -->
+</aside><!-- .sidebar -->
+		<aside class="footer-widgets">
+	<div class="inner-wide">
+		<div class="widget-area">
+			<div class="footer-col">
+				<section class="widget widget-recent-posts">
+					<h2 class="widget-title">Latest Posts</h2>
+					<ul>
+						<li>
+							<div class="recent-title"><a href="../development-environments-within-vms/index.html">Development Environments Within VMs</a></div>
+							<div class="recent-date">March 04, 2018</div>
+						</li>
+						<li>
+							<a href="../focusing-on-whats-important-with-octobox/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/s9fq4.jpg);"><span class="screen-reader-text">Focusing on what&#x27;s important: Managing GitHub notifications with Octobox</span></a>
+							<div class="recent-title"><a href="../focusing-on-whats-important-with-octobox/index.html">Focusing on what&#x27;s important: Managing GitHub notifications with Octobox</a></div>
+							<div class="recent-date">February 22, 2018</div>
+						</li>
+						<li>
+							<a href="../room-to-move/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/duotone.png);"><span class="screen-reader-text">Room to Move</span></a>
+							<div class="recent-title"><a href="../room-to-move/index.html">Room to Move</a></div>
+							<div class="recent-date">February 13, 2018</div>
+						</li>
+						<li>
+							<a href="../healthy-teams-are-productive-teams/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/duotone--1-.png);"><span class="screen-reader-text">Healthy Teams Are Productive Teams</span></a>
+							<div class="recent-title"><a href="../healthy-teams-are-productive-teams/index.html">Healthy Teams Are Productive Teams</a></div>
+							<div class="recent-date">January 30, 2018</div>
+						</li>
+					</ul>
+				</section><!-- .widget -->
+			</div>
+
+			<div class="footer-col">
+				<section class="widget">
+					<h2 class="widget-title">Tell your story</h2>
+					<p>Everyone is welcome and encouraged to write for this community-run Developer Productivity website</p>
+					<p>We'd love to hear your or your company's story about what Developer Productivity means to you. You retain all ownership! See <a href="../disclaimers.html">this for more info</a></p>
+					<p>We're working on an auto-invite system - in the meantime, ping @julian on the Developer Productivity Slack Group</p>
+				</section><!-- .widget -->
+			</div>
+		</div><!-- .widget-area -->
+
+		<div class="widegt-area">
+			<div class="footer-col">
+				<section class="widget widget-tags">
+					<h2 class="widget-title">Tags</h2>
+					<div class="tagcloud">
+							<a href="../tag/general-productivity/index.html">General Productivity</a><a href="../tag/developer-environments/index.html">Developer Environments</a><a href="../tag/mystery-science/index.html">Mystery Science</a><a href="../tag/meetup/index.html">Meetup</a><a href="../tag/version-control-and-hosting/index.html">Version Control and Hosting</a><a href="../tag/datadog/index.html">Datadog</a><a href="../tag/continuous-integration/index.html">Continuous Integration</a><a href="../tag/deploys-and-release-engineering/index.html">Deploys and Release Engineering</a><a href="../tag/mobile-tooling/index.html">Mobile Tooling</a><a href="../tag/company/index.html">company</a><a href="../tag/fullscript/index.html">Fullscript</a><a href="../tag/surveymonkey/index.html">SurveyMonkey</a><a href="../tag/thescore/index.html">theScore</a>
+						<a href="../tag/shopify/index.html">Shopify</a>
+					</div>
+				</section><!-- .widget -->
+			</div>
+		</div>
+	</div><!-- .inner-wide -->
+</aside><!-- .footer-widgets -->
+		<footer class="site-footer">
+	<div class="site-info inner-wide">
+		<p><a href="https://twitter.com/devproductivity" target="_blank"><span class="icon-twitter" aria-hidden="true"></span><span class="screen-reader-text">Twitter</span> Follow us on Twitter</a></p>
+		<p><a href="../index.html">Developer Productivity</a> &copy; 2019 <br /><a href="../disclaimers.html">Content Disclaimers</a><br />Curious theme by <a target="_blank" href="https://justgoodthemes.com/">JustGoodThemes</a></p> <br />Made and written with ♥ from people around the world</p>
+	</div><!-- .site-info -->
+</footer><!-- .site-footer -->
+		<section class="site-search" role="search">
+	<div class="search-scrollable">
+		<div class="search-box">
+			<div class="search-box-inside">
+				<h2 class="screen-reader-text">Search Developer Productivity</h2>
+				<form class="search-form">
+					<label class="screen-reader-text">Search for:</label>
+					<input type="text" id="search-field" class="search-field" placeholder="Type your keywords&hellip;" />
+					<input type="submit" class="search-submit" value="Search" />
+				</form>
+				<div id="search-results" class="search-results"></div>
+			</div><!-- .search-box-inside -->
+		</div><!-- .search-box -->
+		<a class="search-toggle" href="index.html#"><span class="screen-reader-text">Close</span><span aria-hidden="true" class="icon-close-custom"></span></a>
+	</div><!-- .search-scrollable -->
+</section><!-- .site-search -->
+		<div class="overlay"></div>
+	</div><!-- #page -->
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script>window.jQuery || document.write('<script src="../assets/js/jquery-3.2.1.min.js@v=eb72bba485"><\/script>');</script>
+	
+
+	<script type="text/javascript" src="../assets/js/plugins.js@v=eb72bba485"></script>
+	<script type="text/javascript" src="../assets/js/custom.js@v=eb72bba485"></script>
+</body>
+</html>

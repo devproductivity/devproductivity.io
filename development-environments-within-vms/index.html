@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Development Environments Within VMs</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link href="https://fonts.googleapis.com/css?family=Droid+Serif:400,400italic,700,700italic%7CMontserrat:400,700" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="../assets/css/style.css@v=eb72bba485.css" />
+
+	<script type="text/javascript">
+		var disqus_shortname = 'developer-productivity', // replace my_disqus_shortname with your shortname
+			instagram_user_id = '', // add your Instagram user ID
+			instagram_access_token = ''; // add your Instagram access token
+	</script>
+
+	<link rel="shortcut icon" href="../favicon.png" type="image/png" />
+    <link rel="canonical" href="index.html" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="amp/index.html" />
+    
+    <meta property="og:site_name" content="Developer Productivity" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Development Environments Within VMs" />
+    <meta property="og:description" content="A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as Vagrant make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine." />
+    <meta property="og:url" content="https://devproductivity.io/development-environments-within-vms/" />
+    <meta property="article:published_time" content="2018-03-04T02:15:35.000Z" />
+    <meta property="article:modified_time" content="2018-03-04T02:15:35.000Z" />
+    <meta property="article:tag" content="Developer Environments" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Development Environments Within VMs" />
+    <meta name="twitter:description" content="A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as Vagrant make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine." />
+    <meta name="twitter:url" content="https://devproductivity.io/development-environments-within-vms/" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Jean-Francois Bibeau" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Developer Environments" />
+    <meta name="twitter:site" content="@devproductivity" />
+    <meta name="twitter:creator" content="@jfbibeau" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Developer Productivity",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://devproductivity.io/content/images/2018/01/logo-1-1.png",
+            "width": 60,
+            "height": 60
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Jean-Francois Bibeau",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/95a29bd0a0c5363ed72737057c6db2a2?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://devproductivity.io/author/jfbibeau/",
+        "sameAs": [
+            "https://twitter.com/jfbibeau"
+        ]
+    },
+    "headline": "Development Environments Within VMs",
+    "url": "https://devproductivity.io/development-environments-within-vms/",
+    "datePublished": "2018-03-04T02:15:35.000Z",
+    "dateModified": "2018-03-04T02:15:35.000Z",
+    "keywords": "Developer Environments",
+    "description": "A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as Vagrant make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine.",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://devproductivity.io/"
+    }
+}
+    </script>
+
+    
+    <link rel="alternate" type="application/rss+xml" title="Developer Productivity" href="../rss/index.html" />
+    <meta name="google-site-verification" content="X_Ag2Sd2pE0MGDg2otSMuVmUsRJt8aImUfPGuia6wiU" />
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-114643274-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-114643274-1');
+</script>
+</head>
+<body class="post-template tag-developer-environments">
+	<div id="page" class="site">
+		<header class="site-header">
+	<div class="inner-wide">
+		<p class="site-logo"><a href="../index.html"><img src="../content/images/2018/01/logo-1-1.png" alt="Developer Productivity" />&nbsp; Developer Productivity</a></p>
+			<nav class="site-navigation" aria-label="Main Menu">
+	<h2 class="screen-reader-text">Explore Website</h2>
+	<ul class="menu">
+		<li class="menu-item home" role="presentation"><a href="../index.html">Home</a></li>
+		<li class="menu-item what-is-it" role="presentation"><a href="../what-is-developer-productivity/index.html">What is it?</a></li>
+		<li class="menu-item focus-areas" role="presentation"><a href="../focus-areas/index.html">Focus Areas</a></li>
+		<li class="menu-item company-case-studies" role="presentation"><a href="../companies/index.html">Company Case Studies</a></li>
+		<li class="menu-item slack-meetups" role="presentation"><a href="../slack-and-meetups/index.html">Slack &amp; Meetups</a></li>
+    <li class="menu-item"><a href="https://chat.devproductivity.io"><img src="https://chat.devproductivity.io/badge.svg"></a></li>
+	</ul><!-- .menu -->
+</nav><!-- .site-navigation -->
+
+		<a class="search-toggle" href="index.html#"><span class="screen-reader-text">Search</span><span class="icon-search" aria-hidden="true"></span></a>
+		<a class="sidebar-toggle" href="index.html#"><span class="screen-reader-text">Open Sidebar</span><span class="icon-nav-custom" aria-hidden="true"></span></a>
+	</div><!-- .inner-wide -->
+</header><!-- .site-header -->
+		
+<main class="site-main">
+	<div class="site-content">
+
+		<article class="post tag-developer-environments">
+			<header class="cover post-header">
+				<div class="cover-content">
+					<div class="inner">
+						<div class="post-tags">
+							<a href="../tag/developer-environments/index.html">Developer Environments</a>
+						</div><!-- .post-tags -->
+						<h1 class="post-title">Development Environments Within VMs</h1>
+						<div class="post-meta">
+							by <span class="post-author"><a href="../author/jfbibeau/index.html">Jean-Francois Bibeau</a></span> on <time class="published" datetime="2018-03-04">March 04, 2018</time> <span class="reading-time">5 min read</span>
+						</div><!-- .post-meta -->
+						<a href="index.html#" class="scroll-down square light"><span class="icon-down-custom" aria-hidden="true"></span><span class="screen-reader-text">Scroll Down</span></a>
+					</div><!-- .inner -->
+				</div><!-- .cover-content -->
+			</header><!-- .cover -->
+
+			<div class="post-content inner">
+				<div class="kg-card-markdown"><p>A popular paradigm to consider when creating or retooling a complex development environment is bundling it in a virtual machine (VM). Tools such as <a href="https://www.vagrantup.com/">Vagrant</a> make this easy and appealing. This post will attempt to explore some of the pros and cons of development environments contained within a virtual machine.</p>
+<h1 id="basicconcepts">Basic Concepts</h1>
+<p>Let's explore some basic concepts regarding development environments in VMs. Ideally these should be considered thoroughly before starting the implementation:</p>
+<ol>
+<li>The VM provider: Will this be a local hypervisor (ex: kvm, VirtualBox), or a remote one (ex: VMWare, OpenStack)?</li>
+<li>The VM provisioner: Generally, a layer of configurations need to be applied to your virtual machine. This could be as simple as a bash script, or as complex as running a configuration management tool such as Chef, Puppet or Ansible.</li>
+<li>The VM base OS: You'll have to pick which operating system the guest VM is running; ideally this would be the same as in production.</li>
+<li>Delineation between host and guest: What stays on the host, as opposed to living on the guest VM? Where does the code live?</li>
+</ol>
+<h1 id="aconcreteexample">A Concrete Example</h1>
+<p>This article will explore some advantages as well as some challenges with this approach. We'll look at a specific implementation of a development environment for a company I worked for. Specifically:</p>
+<ol>
+<li>VM Provider: The VM provider chosen was the default Vagrant provider, VirtualBox. This is the easiest to implement, as VirtualBox has support for many host operating systems and is proven software.</li>
+<li>VM Provisioner: Chef was picked primarily because of its ability to have automated pull capabilities from a central server. This allows the development environment to grow and receive updates which will automatically be rolled out to all developers, without requiring end-users to run any commands to pick up the updates.</li>
+<li>VM base OS: We decided to go with RedHat Enterprise Linux since this was the chosen OS for the production environment.</li>
+<li>Host/guest split: This is the most complicated decision. In our implementation, the host OS runs the IDE and hosts the code. Keeping the code on the host OS ensures that any mishaps with the VM does not result in code loss. All other build tools and runtimes (JDK, Gradle, NodeJS, Tomcat) run within the guest OS. Source code management (git) is installed both on the host and the guest, for extra flexibility.</li>
+</ol>
+<h2 id="extranicetohaves">Extra nice-to-haves</h2>
+<p>A few more nice-to-haves were implemented:</p>
+<ul>
+<li>Automatic SSH key forwarding: the host OS' SSH key is automatically forwarded to the VM, allowing git identities to be preserved across boundaries.</li>
+<li>Automatic X11 forwarding: GUI applications can be started from the VM and forwarded to the host OS, if needed</li>
+<li>Automatic shell variable setup: A file was created by convention and copied to the VM on every start, allowing a user to preserve configurations/shell variables even after a VM destroy/create.</li>
+</ul>
+<h1 id="advantages">Advantages</h1>
+<h2 id="fastonboarding">Fast onboarding</h2>
+<p>One of the main advantages of this approach is the speed of first-time setup. For a new developer coming along, the setup process is essentially 2 commands: 1 to setup his host OS (install Vagrant/VirtualBox/Git and get the necessary files for setup), and 1 to bring the VM up.</p>
+<p>After only a few minutes (target time being 3-5 minutes at most), the developer has a fully functional development environment.</p>
+<h2 id="abilitytodestroyandrecreatequickly">Ability to destroy and recreate quickly</h2>
+<p>Based on what we saw in the previous step, a developer is able to quickly recreate his development environment. If something goes wrong during development, many developers will choose to simply recreate the development environment instead of spending an hour troubleshooting the system.</p>
+<h2 id="isolationfromthehostmachine">Isolation from the host machine</h2>
+<p>Another advantage is isolution from the host machine. Many development tools may conflict with the host OS, for example installing or upgrading python packages using the system-level python may have undesired consequences. Later trying to undo those changes can be really problematic. Hosting everything within a VM lets developers experiment freely without fear of damaging their host OS configurations or packages.</p>
+<h2 id="supportofmultiplehostoses">Support of multiple host OSes</h2>
+<p>One of the requirements we had was to support multiple host OSes. Most developers traditionally did development on Linux workstations, so we had to support RedHat and Ubuntu. MacBooks were also being introduced, so support for Mac was a must. And finally, several QA engineers only had a Windows laptop but were still expected to develop tests, so Windows support was a nice to have.</p>
+<p>Trying to tool or document all these setup steps for 4 different OSes would be near impossible. With a VM, this problem goes away almost completely.</p>
+<h2 id="easeoftroubleshooting">Ease of troubleshooting</h2>
+<p>And finally, because everyone is using the same development OS and all resources have been setup the same way, when a developer needs support, that support can be provided much more efficiently. No more finding out which version of Java they installed or where their global npm <code>node_modules</code> folder is - everything is at the same place and configured identically for every developer.</p>
+<h2 id="reuseduringci">Re-use during CI</h2>
+<p>Since the development environment is a virtual machine, it can be re-used during continuous integration for the build slaves. That way, CI processes run on the identical environment as developers, removing the &quot;it builds on my box, why doesn't it build on CI?&quot; problem! Specifically using vagrant, you can simply pick another provider, for example OpenStack instead of VirtualBox, and run your build slaves on the cloud.</p>
+<h1 id="challenges">Challenges</h1>
+<h2 id="nfsmountforcodeshare">NFS mount for code share</h2>
+<p>The previous article on <a href="../shopify-developer-environments-p1.html">Shopify Developer Environments </a> touched on this slighty: since the IDE and the code was on the host machine, but all build and runtime tools were on the development environment VM, this meant the code had to be shared. The default VirtualBox shared filesystem is notoriously slow, so the current fastest way to share code is with an NFS mount. This works and is pretty fast, but nowhere near as fast as having the code and the tools on the same physical drive.</p>
+<p>Additionally, this extra NFS layer added some problems when using tools such as file watchers, and also exposed some buggy NFS implementations in macOS.</p>
+<h2 id="natportforwarding">NAT/port forwarding</h2>
+<p>Since our code is now compiled and running in the VM, this means we need to reach out to a different local IP address to connect to it. This is fine locally, however if a coworker wants to reach your VM's private IP, it won't be reachable. Which is where NAT'ing (to enable VM -&gt; outside connectivity) and port forwarding (to enable outside -&gt; VM connectivity) need to be configured properly.</p>
+<p>These can all be configured, however it introduces more complexity to the runtime environments as applications (and developers!) now need to work in a NAT'd environment and be aware of private and public IP addresses.</p>
+<h2 id="chefregistration">Chef registration</h2>
+<p>Finally, one specific downside of Chef is that each node that receives configurations must be registered centrally with the Chef server using a private key. We went with a convention of using a known VM name appended to the host machine's hostname to ensure uniquess across the organization, and auto-registration on VM up. However if a developer uncleanly deletes the VM, or if a workstation changes hostnames, the registration with the Chef server can be left behind, causing headaches for the developer.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Overall, this approach has been successful, although not perfect. The trade-offs can mostly be tooled around, and the advantages generally give us enough benefits to continue with this appraoch. However, work is always ongoing to iterate and improve on this approach. Hopefully this article has been useful to share our thoughts on VMs for developer environments!</p>
+</div>
+			</div><!-- .post-content -->
+
+				<footer class="post-footer inner">
+					<div class="share-post">
+						<span>Share</span>
+						<a class="square" target="_blank" href="https://twitter.com/intent/tweet?text=Development%20Environments%20Within%20VMs&amp;url=https://devproductivity.io/development-environments-within-vms/"><i class="icon-twitter" aria-hidden="true"></i><span class="screen-reader-text">Share on Twitter</span></a>
+						<a class="square" target="_blank" href="https://www.facebook.com/sharer.php?u=https://devproductivity.io/development-environments-within-vms/"><i class="icon-facebook" aria-hidden="true"></i><span class="screen-reader-text">Share on Facebook</span></a>
+						<a class="square" target="_blank" href="https://plus.google.com/share?url=https://devproductivity.io/development-environments-within-vms/"><i class="icon-google" aria-hidden="true"></i><span class="screen-reader-text">Share on Google+</span></a>
+					</div>
+						<div class="author-box">
+							<img src="https://www.gravatar.com/avatar/95a29bd0a0c5363ed72737057c6db2a2?s=250&amp;d=mm&amp;r=x" alt="Jean-Francois Bibeau's Picture" class="author-avatar" />
+							<h2 class="author-title">About <a href="../author/jfbibeau/index.html">Jean-Francois Bibeau</a></h2>
+							<p class="author-links">
+								<span class="author-location"><i class="icon-map-marker" aria-hidden="true"></i> Ottawa, ON</span>
+								<span class="author-twitter"><i class="icon-twitter" aria-hidden="true"></i> <a href="https://twitter.com/jfbibeau" target="_blank">Twitter</a></span>
+							</p>
+						</div>
+			</footer><!-- .post-footer -->
+		</article><!-- .post -->
+
+
+		<section class="comments-area inner">
+	<h2 class="comments-title"><span class="icon-plus-custom" aria-hidden="true"></span> Comments</h2>
+	<div id="disqus_thread"></div>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus</a>.</noscript>
+</section><!-- .comments-area -->
+
+
+			<nav class="post-navigation">
+				<a href="../focusing-on-whats-important-with-octobox/index.html" class="nav-previous">
+					<div class="nav-bg" style="background-image: url(../content/images/2018/02/s9fq4.jpg)"></div>
+					<div class="nav-inside">
+						<span class="nav-before">Previous</span><span class="nav-title">Focusing on what&#x27;s important: Managing GitHub notifications with Octobox</span><span class="nav-date">February 22, 2018</span>
+					</div>
+				</a>
+			</nav><!-- .post-navigation -->
+
+	</div><!-- .site-content -->
+</main><!-- .site-main -->
+
+		<aside class="sidebar" aria-label="Sidebar">
+	<div class="sidebar-scrollable">
+		<div class="widget-area">
+				<nav class="site-navigation" aria-label="Main Menu">
+	<h2 class="screen-reader-text">Explore Website</h2>
+	<ul class="menu">
+		<li class="menu-item home" role="presentation"><a href="../index.html">Home</a></li>
+		<li class="menu-item what-is-it" role="presentation"><a href="../what-is-developer-productivity/index.html">What is it?</a></li>
+		<li class="menu-item focus-areas" role="presentation"><a href="../focus-areas/index.html">Focus Areas</a></li>
+		<li class="menu-item company-case-studies" role="presentation"><a href="../companies/index.html">Company Case Studies</a></li>
+		<li class="menu-item slack-meetups" role="presentation"><a href="../slack-and-meetups/index.html">Slack &amp; Meetups</a></li>
+    <li class="menu-item"><a href="https://chat.devproductivity.io"><img src="https://chat.devproductivity.io/badge.svg"></a></li>
+	</ul><!-- .menu -->
+</nav><!-- .site-navigation -->
+
+			<section class="widget widget-text">
+				<h2 class="widget-title">About Developer Productivity</h2>
+				<p>Productivity is defined as “the effectiveness of productive effort, especially in industry, as measured in terms of the rate of output per unit of input.” Therefore, developer Productivity can be described as a concept, set of tools or processes, or a team that is dedicated to enhancing the efficiency of other developers with the goal of allowing them to increase their overall output.</p>
+
+				<p>This concept and the responsibilities of the team in charge of developer productivity can be varied throughout different companies, however after a number of meetings it became clear that the teams mostly focus on a few key areas. Unfortunately, the developers at different companies don’t seem to discuss, have meet-ups, or work together on allied goals.</p>
+
+				<a href="../what-is-developer-productivity/index.html">Read More</a>
+			</section><!-- .widget -->
+		</div><!-- .widget-area -->
+		<a class="sidebar-toggle" href="index.html#"><span class="screen-reader-text">Close Sidebar</span><span aria-hidden="true" class="icon-close-custom"></span></a>
+	</div><!-- .sidebar-scrollable -->
+</aside><!-- .sidebar -->
+		<aside class="footer-widgets">
+	<div class="inner-wide">
+		<div class="widget-area">
+			<div class="footer-col">
+				<section class="widget widget-recent-posts">
+					<h2 class="widget-title">Latest Posts</h2>
+					<ul>
+						<li>
+							<div class="recent-title"><a href="index.html">Development Environments Within VMs</a></div>
+							<div class="recent-date">March 04, 2018</div>
+						</li>
+						<li>
+							<a href="../focusing-on-whats-important-with-octobox/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/s9fq4.jpg);"><span class="screen-reader-text">Focusing on what&#x27;s important: Managing GitHub notifications with Octobox</span></a>
+							<div class="recent-title"><a href="../focusing-on-whats-important-with-octobox/index.html">Focusing on what&#x27;s important: Managing GitHub notifications with Octobox</a></div>
+							<div class="recent-date">February 22, 2018</div>
+						</li>
+						<li>
+							<a href="../room-to-move/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/duotone.png);"><span class="screen-reader-text">Room to Move</span></a>
+							<div class="recent-title"><a href="../room-to-move/index.html">Room to Move</a></div>
+							<div class="recent-date">February 13, 2018</div>
+						</li>
+						<li>
+							<a href="../healthy-teams-are-productive-teams/index.html" class="recent-thumb" style="background-image: url(../content/images/2018/02/duotone--1-.png);"><span class="screen-reader-text">Healthy Teams Are Productive Teams</span></a>
+							<div class="recent-title"><a href="../healthy-teams-are-productive-teams/index.html">Healthy Teams Are Productive Teams</a></div>
+							<div class="recent-date">January 30, 2018</div>
+						</li>
+					</ul>
+				</section><!-- .widget -->
+			</div>
+
+			<div class="footer-col">
+				<section class="widget">
+					<h2 class="widget-title">Tell your story</h2>
+					<p>Everyone is welcome and encouraged to write for this community-run Developer Productivity website</p>
+					<p>We'd love to hear your or your company's story about what Developer Productivity means to you. You retain all ownership! See <a href="../disclaimers.html">this for more info</a></p>
+					<p>We're working on an auto-invite system - in the meantime, ping @julian on the Developer Productivity Slack Group</p>
+				</section><!-- .widget -->
+			</div>
+		</div><!-- .widget-area -->
+
+		<div class="widegt-area">
+			<div class="footer-col">
+				<section class="widget widget-tags">
+					<h2 class="widget-title">Tags</h2>
+					<div class="tagcloud">
+							<a href="../tag/general-productivity/index.html">General Productivity</a><a href="../tag/developer-environments/index.html">Developer Environments</a><a href="../tag/mystery-science/index.html">Mystery Science</a><a href="../tag/meetup/index.html">Meetup</a><a href="../tag/version-control-and-hosting/index.html">Version Control and Hosting</a><a href="../tag/datadog/index.html">Datadog</a><a href="../tag/continuous-integration/index.html">Continuous Integration</a><a href="../tag/deploys-and-release-engineering/index.html">Deploys and Release Engineering</a><a href="../tag/mobile-tooling/index.html">Mobile Tooling</a><a href="../tag/company/index.html">company</a><a href="../tag/fullscript/index.html">Fullscript</a><a href="../tag/surveymonkey/index.html">SurveyMonkey</a><a href="../tag/thescore/index.html">theScore</a>
+						<a href="../tag/shopify/index.html">Shopify</a>
+					</div>
+				</section><!-- .widget -->
+			</div>
+		</div>
+	</div><!-- .inner-wide -->
+</aside><!-- .footer-widgets -->
+		<footer class="site-footer">
+	<div class="site-info inner-wide">
+		<p><a href="https://twitter.com/devproductivity" target="_blank"><span class="icon-twitter" aria-hidden="true"></span><span class="screen-reader-text">Twitter</span> Follow us on Twitter</a></p>
+		<p><a href="../index.html">Developer Productivity</a> &copy; 2019 <br /><a href="../disclaimers.html">Content Disclaimers</a><br />Curious theme by <a target="_blank" href="https://justgoodthemes.com/">JustGoodThemes</a></p> <br />Made and written with ♥ from people around the world</p>
+	</div><!-- .site-info -->
+</footer><!-- .site-footer -->
+		<section class="site-search" role="search">
+	<div class="search-scrollable">
+		<div class="search-box">
+			<div class="search-box-inside">
+				<h2 class="screen-reader-text">Search Developer Productivity</h2>
+				<form class="search-form">
+					<label class="screen-reader-text">Search for:</label>
+					<input type="text" id="search-field" class="search-field" placeholder="Type your keywords&hellip;" />
+					<input type="submit" class="search-submit" value="Search" />
+				</form>
+				<div id="search-results" class="search-results"></div>
+			</div><!-- .search-box-inside -->
+		</div><!-- .search-box -->
+		<a class="search-toggle" href="index.html#"><span class="screen-reader-text">Close</span><span aria-hidden="true" class="icon-close-custom"></span></a>
+	</div><!-- .search-scrollable -->
+</section><!-- .site-search -->
+		<div class="overlay"></div>
+	</div><!-- #page -->
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script>window.jQuery || document.write('<script src="../assets/js/jquery-3.2.1.min.js@v=eb72bba485"><\/script>');</script>
+	
+
+	<script type="text/javascript" src="../assets/js/plugins.js@v=eb72bba485"></script>
+	<script type="text/javascript" src="../assets/js/custom.js@v=eb72bba485"></script>
+</body>
+</html>
