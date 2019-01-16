@@ -950,23 +950,6 @@ input[type="button"].square {
 .sidebar-toggle {
   display: none; }
 
-.sidebar-toggle,
-.search-toggle {
-  border: 0;
-  color: #111;
-  cursor: pointer;
-  height: 30px;
-  position: absolute;
-  right: 30px;
-  text-align: center;
-  top: 5px;
-  width: 30px; }
-
-.search-toggle {
-  display: block;
-  font-size: 21px;
-  line-height: 1.6; }
-
 /**
  * 5. Site Navigation
  * ----------------------------------------------------------------------------
