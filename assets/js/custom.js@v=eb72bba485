@@ -57,16 +57,6 @@
 			$(this).parent().removeClass('slider-loading');
 		});
 
-		// Site search
-		var searchField = $('#search-field').ghostHunter({
-			results : "#search-results",
-			onKeyUp : true,
-			onPageLoad : true,
-			includepages : true,
-			info_template : '<div class="results-info">Posts found: {{amount}}</div>',
-			result_template : '<div class="result-item"><a href="{{link}}"><div class="result-title">{{title}}</div><div class="result-date">{{pubDate}}</div></a></div>'
-		});
-
 		// Hidden sections
 		$('.sidebar-toggle').on('click', function(e){
 			$body.toggleClass('sidebar-opened');
